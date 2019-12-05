@@ -37,7 +37,7 @@ def gen_k_hash_functions(k):
 def min_hash(seq, hash_fxns, kmer_len, stride_len):
 	'''
 	Return minhash fingerprint of seq using k hash_fxns.
-	Each hash key is a kmer of length kmer_len. 
+	Each hash key is a kmer of length kmer_len.
 	Stride length between kmers given by stride_len.
 	'''
 	fingerprint = [0]*len(hash_fxns)
