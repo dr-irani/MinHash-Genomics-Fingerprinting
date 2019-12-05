@@ -1,3 +1,22 @@
+def k_partition(seq, k, kmer_len, stride_len):
+	'''
+	Return k-partition minhash sketch fingerprint of seq.
+	'''
+	n = len(seq)
+	p_size = math.floor(n/k)
+	hashes = []
+
+	for i in range(k):
+		j = i * p_size
+		min_value = float('inf')
+		while j < (i+1) * p_size and j < n:
+			if hash(seq[j:j+kmer_len]) < min_value:
+				min_value = hash(seq[j:j+kmer_len])
+				j += stride_len
+		hashes.append(min_value)
+
+	return hashes
+
 def bottom_k(seq, k, kmer_len, stride_len):
 	'''
 	Return bottom-k minhash sketch fingerprint of seq.
