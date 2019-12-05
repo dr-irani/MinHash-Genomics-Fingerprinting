@@ -9,6 +9,7 @@ bases = list('GTCA')
 
 def random_seq(seq_len):
 	return ''.join(np.random.choice(bases,seq_len))
+	
 def gen_random_seq(filename, seq_len):
 	'''
 	Generate and return random GTCA sequence of length seq_len.
@@ -101,10 +102,6 @@ def get_args():
 	return args
 
 if __name__ == '__main__':
-	'''
-	python generate_data.py <length> <ins> <del> <swp> <true_filename> <edited_filename>
-							1		 2     3	 4 		5 				6
-	'''
 	args = get_args()
 	seq_len = args.seq_len
 	if args.random_type == 'normal':
