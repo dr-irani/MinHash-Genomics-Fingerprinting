@@ -2,7 +2,7 @@ from generate_data import *
 import random
 
 if __name__ == '__main__':
-	sigma = 10
+	sigma = 40
 	seq_len = 8000
 	num_seq = 10
 	num_edits = [i*100 for i in range(1,11)] # num_edits = [100-1000]

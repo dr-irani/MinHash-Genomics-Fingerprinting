@@ -179,12 +179,22 @@ def calculate_jaccard(k, f1, f2):
 
 	return len(inter)/k
 
-def estimate_edit_distance(jaccard, len_x, len_y):
-	if len_x == len_y:
-		return [int(jaccard * len_x)]
-	else:
-		alpha = min(len_x, len_y) / max(len_x, len_y)
-		return [1 - alpha, (1+alpha) * (jaccard/(2-jaccard))]
+def estimate_edit_distance(jaccard, len_x, len_y, kmer_len):
+	'''
+	Return 3 different estimates for edit distance.
+	2 values from the bounds of the IEEE paper.
+	1 value from our equation.
+	'''
+	edit_distance = [0] * 3
+	max_len = max(len_x, len_y)
+	min_len = min(len_x, len_y)
+	
+	alpha = min_len/max_len
+	edit_distance[0] = 1 - alpha
+	edit_distance[1] = (1 + alpha) * (jaccard/(2-jaccard)) * max_len
+	edit_distance[2] = (max_len - jaccard*min_len) / (kmer_len * (jaccard + 1))
+
+	return edit_distance
 
 def mash_distance(jaccard, kmer_len):
 	# this seems to be pretty different from the actual edit distance though..
@@ -221,7 +231,7 @@ def main():
 		jaccard = calculate_jaccard(num_hash, fp1, fp2)
 	mash_dist = mash_distance(jaccard, kmer_len)
 
-	est_edit_dist = estimate_edit_distance(jaccard, sets[0].len, sets[1].len)
+	#est_edit_dist = estimate_edit_distance(jaccard, sets[0].len, sets[1].len)
 
 	print(jaccard, mash_dist)
 	print("edit dist", est_edit_dist)

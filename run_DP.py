@@ -2,7 +2,7 @@ import random
 import gc
 from edit_distance_DP import edDistDp
 import re
-
+import glob
 def calculate_metrics(seq1, seq2):
 
 	edit_distance = edDistDp(seq1, seq2)
@@ -11,24 +11,27 @@ def calculate_metrics(seq1, seq2):
 
 def simulated_data():
 	
-	filenames1 = ['data/synth_{}.txt'.format(i) for i in range(1,11)]
-	filenames2 = ['data/synth_{}_edited.txt'.format(i) for i in range(1, 11)]
-	reads = []
+	filenames1 = ['synth_data/synth_{}.txt'.format(i) for i in range(1,11)]
+	#filenames2 = ['data/synth_{}_edited.txt'.format(i) for i in range(1, 11)]
 
 	for i in range(1, 11):
 		fn1 = filenames1[i-1]
-		fn2 = filenames2[i-1]
-		with open(fn1) as f:
-			seq1 = f.readline()
-		with open(fn2) as f:
-			seq2 = f.readline()
+		filenames2 = glob.glob('synth_data/synth_1_edited_*.txt')
 
-		fo_name = 'output/synth_{}_editdistance.txt'.format(i)
-		fo = open(fo_name, 'w')
-		output = calculate_metrics(seq1, seq2)
-		fo.write(output)
-		print("%d completed" % i)
-		fo.close
+		with open(fn1) as f1:
+			seq1 = f1.readline()
+			for j in range(5):
+				fn2 = filenames2[j]
+				with open(fn2) as f2:
+					seq2 = f2.readline()
+				fo_name = 'synth_output/synth_{}_{}_editdistance.txt'.format(i, j)
+				fo = open(fo_name, 'w')
+				output = calculate_metrics(seq1, seq2)
+				fo.write(output)
+				print("%d completed" % i)
+				fo.close
+
+		
 
 	# with open(filename) as f:
 	# 	seq = f.readline()
