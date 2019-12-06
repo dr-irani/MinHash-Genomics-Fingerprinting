@@ -119,6 +119,9 @@ def estimate_edit_distance(jaccard, len_x, len_y):
 		return [1 - alpha, (1+alpha) * (jaccard/(2-jaccard))]
 
 def mash_distance(jaccard, kmer_len):
+	# this seems to be pretty different from the actual edit distance though..
+	# correlation yes, but very different scale
+	
 	return (-1/kmer_len) * np.log(2 * jaccard / (1 + jaccard))
 
 def main():
@@ -165,8 +168,9 @@ def main():
 	print(fp2)
 	print(np.count_nonzero(fp1 == fp2))
 	print(est_edit_dist)
-	print(elapsed_time)
 	print(mash_dist)
+	print(elapsed_time)
+	
 
 if __name__ == '__main__':
 	main()
