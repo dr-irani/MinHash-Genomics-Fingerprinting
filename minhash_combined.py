@@ -74,7 +74,7 @@ def min_hash(seqset, num_hash, method, hash_fxns = None):
 	fingerprint = [0]*num_hash
 	if hash_fxns == None:
 		hash_fxns = gen_k_hash_functions(1)
-		h = hash_fxns[0]
+	h = hash_fxns[0]
 
 
 	if method == "khash":
@@ -103,14 +103,14 @@ def min_hash(seqset, num_hash, method, hash_fxns = None):
 		# Literature suggested using the first few bits...but I'm going to try mod
 		for kmer in seqset:
 			hval = apply_hash(h, kmer)
-			i = hval % k
+			i = hval % num_hash
 			fingerprint[i] = min(fingerprint[i], hval)
 
 	if method == "minimizerSeq":
 		# MinHash that stores minimizer sequences
 		pass
 
-	# return fingerprint, hash_fxns
+	return fingerprint, hash_fxns
 
 
 def calculate_jaccard(k, f1, f2):
@@ -125,7 +125,7 @@ def calculate_jaccard(k, f1, f2):
 
 def estimate_edit_distance(jaccard, len_x, len_y):
 	if len_x == len_y:
-		return [jaccard * len_x]
+		return [int(jaccard * len_x)]
 	else:
 		alpha = min(len_x, len_y) / max(len_x, len_y)
 		return [1 - alpha, (1+alpha) * (jaccard/(2-jaccard))]
@@ -154,13 +154,13 @@ def main():
 		set2 = create_k_mer_set(seq, kmer_len, stride_len)
 
 
-	start_time = time.time()
+	#start_time = time.time()
 	fp1, hash_fxns = min_hash(set1, num_hash, method='khash')
 	fp2, hash_fxns = min_hash(set2, num_hash, method='khash', hash_fxns=hash_fxns)
 	jaccard = calculate_jaccard(num_hash, fp1, fp2)
 	est_edit_dist = estimate_edit_distance(jaccard, len_x, len_y)
 	mash_dist = mash_distance(jaccard, kmer_len)
-	elapsed_time = time.time() - start_time
+	#elapsed_time = time.time() - start_time
 
 	print(fp1)
 	print(fp2)
