@@ -5,13 +5,39 @@ import argparse
 import time
 
 
+class BloomFilter(object):
+	def __init__(self, kmers, fp_prob=0.01):
+		self.fp_prob = fp_prob
+		self.num_kmers = kmers
+		self.size = self.calculate_size()
+		self.num_hash = self.calculate_num_hashes()
+		self.filter = np.zeros(self.size)
+
+	def calculate_size(self):
+		return int(-(self.num_kmers * np.log(self.fp_prob)) / np.log(2) ** 2)
+
+	def calculate_num_hashes(self):
+		return int(self.size / self.num_kmers * np.log(2))
+
+	def hash(self, kmer, i):
+		return xxhash.xxh32(kmer, seed=i).intdigest() % self.size
+
+	def add(self, kmer):
+		for i in range(self.num_hash):
+			idx = self.hash(kmer, i)
+			self.filter[idx] == 1
+
+	def find(self, kmer):
+		for i in range(self.num_hash):
+			idx = self.hash(kmer, i)
+			if self.filter[idx] == 0: return False
+		return True
+
+
 def get_args():
 	parser = argparse.ArgumentParser()
-
-	# Change according to how you are passing in your input files
 	parser.add_argument("-f1", help="Path of sequence1 .txt file", required=True)
 	parser.add_argument("-f2", help="Path of sequence2 .txt file", required=True)
-	
 	parser.add_argument("-n", help="Length of fingerprint", required=True, type=int)
 	parser.add_argument("-k", help="Length of kmer", required=True, type=int)
 	parser.add_argument("-s", help="Length of stride", required=True, type=int)
@@ -65,7 +91,7 @@ def gen_k_hash_functions(k):
 	return [xxhash.xxh32(seed=seed) for seed in random_seeds]
 
 
-def min_hash(seqset, num_hash, method, hash_fxns = None):
+def min_hash(seqset, num_hash, method, hash_fxns=None, bloom_filter=None):
 	'''
 	Return MinHash fingerprint the input sequence and the hash function(s) used.
 	3 methods: khash, bottomk, kpartition
@@ -105,12 +131,22 @@ def min_hash(seqset, num_hash, method, hash_fxns = None):
 			hval = apply_hash(h, kmer)
 			i = hval % num_hash
 			fingerprint[i] = min(fingerprint[i], hval)
-
-	if method == "minimizerSeq":
-		# MinHash that stores minimizer sequences
-		pass
-
 	return fingerprint, hash_fxns
+
+
+def containment_min_hash(seqset, num_hash, bloom_filter=None):
+	if bloom_filter is None:
+		bloom_filter = BloomFilter(len(seqset))
+		map(bloom_filter.add, seqset)
+		return bloom_filter
+		# for kmer in seqset:
+		# 	bloom_filter.add(kmer)
+	containment = 0
+	for kmer in seqset:
+		containment += 1 if bloom_filter.find(kmer) else 0
+	containment -= np.round(bloom_filter.fp_prob * num_hash)
+	containment /= num_hash
+	return len(seqset) * containment / (len(seqset) + bloom_filter.num_kmers - len(seqset) * containment)
 
 
 def calculate_jaccard(k, f1, f2):
@@ -142,6 +178,7 @@ def main():
 	num_hash = args.n
 	kmer_len = args.k 
 	stride_len = args.s
+	method = 'containment'
 
 	with open(args.f1, 'r') as f:
 		seq = f.read()
@@ -153,18 +190,23 @@ def main():
 		m = len(seq)
 		set2 = create_k_mer_set(seq, kmer_len, stride_len)
 
+	start_time = time.time()
+	if method == 'khash':
+		sets = [set1, set2]
+		sets.sort(key=len, reverse=True)
+		bloom_filter = containment_min_hash(sets[0], num_hash)
+		jaccard = containment_min_hash(sets[1], num_hash, bloom_filter=bloom_filter)
+	else:
+		fp1, hash_fxns = min_hash(set1, num_hash, method=method)
+		fp2, hash_fxns = min_hash(set2, num_hash, method=method, hash_fxns=hash_fxns)
+		jaccard = calculate_jaccard(n, m, num_hash, fp1, fp2)
+		est_edit_dist = estimate_edit_distance(jaccard, len_x, len_y)
+		mash_dist = mash_distance(jaccard, kmer_len)
+		print(fp1)
+		print(fp2)
+		print(np.count_nonzero(fp1 == fp2))
 
-	#start_time = time.time()
-	fp1, hash_fxns = min_hash(set1, num_hash, method='khash')
-	fp2, hash_fxns = min_hash(set2, num_hash, method='khash', hash_fxns=hash_fxns)
-	jaccard = calculate_jaccard(num_hash, fp1, fp2)
-	est_edit_dist = estimate_edit_distance(jaccard, len_x, len_y)
-	mash_dist = mash_distance(jaccard, kmer_len)
-	#elapsed_time = time.time() - start_time
-
-	print(fp1)
-	print(fp2)
-	print(np.count_nonzero(fp1 == fp2))
+	
 	print(est_edit_dist)
 	print(mash_dist)
 	print(elapsed_time)
