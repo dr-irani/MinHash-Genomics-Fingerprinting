@@ -10,12 +10,13 @@ bases = list('GTCA')
 def random_seq(seq_len):
 	return ''.join(np.random.choice(bases,seq_len))
 	
-def gen_random_seq(filename, seq_len):
+def gen_random_seq(filename, seq_len, num_seq):
 	'''
 	Generate and return random GTCA sequence of length seq_len.
 	'''
 	f = open(filename,'w')
-	f.write(random_seq(seq_len)) 
+	for i in range(num_seq):
+		f.write(random_seq(seq_len)) 
 	f.close()
 
 def sample_indices(size, num_indices):
@@ -102,13 +103,15 @@ def get_args():
 	return args
 
 if __name__ == '__main__':
-	args = get_args()
-	seq_len = args.seq_len
-	if args.random_type == 'normal':
-		gen_random_seq(args.filename, args.seq_len)
-	if args.random_type == 'repeating':
-		gen_repeating_seq(args.filename, args.pattern_len, args.pattern_freq, args.seq_len)
+	# args = get_args()
+	# seq_len = args.seq_len
+	# if args.random_type == 'normal':
+	# 	gen_random_seq(args.filename, args.seq_len)
+	# if args.random_type == 'repeating':
+	# 	gen_repeating_seq(args.filename, args.pattern_len, args.pattern_freq, args.seq_len)
 
-	if args.edit_mode == True:
-		perturb_seq(args.filename, args.num_inserts, args.num_deletes, args.num_swaps)
+	# if args.edit_mode == True:
+	# 	perturb_seq(args.filename, args.num_inserts, args.num_deletes, args.num_swaps)
 
+	filename = "data/random_10000bp_50seq.txt"
+	gen_random_seq(filename, 10000, 50)
