@@ -3,13 +3,14 @@ import xxhash
 import numpy as np
 import argparse
 import time
+import copy
 from collections import namedtuple
 
 
 class BloomFilter(object):
 	def __init__(self, kmers, fp_prob=0.01):
 		self.fp_prob = fp_prob
-		self.num_kmers = 0
+		self.num_kmers = kmers
 		self.size = self.calculate_size(kmers)
 		self.num_hash = self.calculate_num_hashes(kmers)
 		self.filter = np.zeros(self.size)
@@ -27,13 +28,22 @@ class BloomFilter(object):
 		for i in range(self.num_hash):
 			idx = self.hash(kmer, i)
 			self.filter[idx] = 1
-			self.num_kmers += 1
+			# self.num_kmers += 1
 
 	def find(self, kmer):
 		for i in range(self.num_hash):
 			idx = self.hash(kmer, i)
 			if self.filter[idx] == 0: return False
 		return True
+
+	def union(self, kmers):
+		union_filter = copy.deepcopy(self.filter)
+		for kmer in kmers:
+			for i in range(self.num_hash):
+				idx = self.hash(kmer, i)
+				union_filter[idx] = 1
+		return np.bitwise_or(self.filter.astype(np.int32), union_filter.astype(np.int32))
+
 
 
 def get_args():
@@ -135,21 +145,23 @@ def min_hash(seqset, num_hash, method, hash_fxns=None):
 	return fingerprint, hash_fxns
 
 
-def containment_min_hash(seqset, bloom_filter=None):
+def containment_min_hash(seqset, larger_set=None, bloom_filter=None):
 	if bloom_filter is None:
 		bloom_filter = BloomFilter(len(seqset))
 		for kmer in seqset:
 			bloom_filter.add(kmer)
 		return bloom_filter
-	containment = 0
-	for kmer in seqset:
-		containment += 1 if bloom_filter.find(kmer) else 0
-	containment -= np.round(bloom_filter.fp_prob * bloom_filter.num_hash)
-	containment /= bloom_filter.num_hash
-	# print(containment, len(seqset), len(seqset) + bloom_filter.num_kmers, containment * len(seqset))
-	return containment * len(seqset) / (len(seqset) + bloom_filter.num_kmers)
+	intersection = len(seqset) + bloom_filter.num_kmers - np.count_nonzero(bloom_filter.union(seqset)) / bloom_filter.num_hash
+	containment = intersection / len(seqset)
+	return intersection / (len(larger_set.union(seqset)))
 
 
+def calculate_true_jaccard(s1, s2):
+	union = s1.union(s2)
+	inter = s1.intersection(s2)
+
+	return union/inter
+	
 def calculate_jaccard(k, f1, f2):
 	''' Calculate Jaccard similarity '''
 	s1 = set(f1)
@@ -193,10 +205,8 @@ def main():
 	start_time = time.time()
 	sets = sorted([set1, set2], key=lambda x: len(x.set), reverse=True)
 	if method == 'containment':
-		print(len(sets[0].set), sets[0].len)
 		bloom_filter = containment_min_hash(sets[0].set)
-		# print(len(bloom_filter.filter), np.count_nonzero(bloom_filter.filter))
-		jaccard = containment_min_hash(sets[1].set, bloom_filter=bloom_filter)
+		jaccard = containment_min_hash(sets[1].set, sets[0].set, bloom_filter=bloom_filter)
 	else:
 		fp1, hash_fxns = min_hash(sets[0].set, num_hash, method=method)
 		fp2, hash_fxns = min_hash(sets[1].set, num_hash, method=method, hash_fxns=hash_fxns)
@@ -205,7 +215,7 @@ def main():
 
 	est_edit_dist = estimate_edit_distance(jaccard, sets[0].len, sets[1].len)
 
-	
+	print(jaccard)
 	print("edit dist", est_edit_dist)
 	# print(elapsed_time)
 
