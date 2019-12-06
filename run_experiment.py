@@ -2,15 +2,12 @@
 import os
 import sys
 import pstats
-from minhash_combined import create_k_mer_set, min_hash, calculate_jaccard, calculate_true_jaccard, containment_min_hash
+from minhash_combined import create_k_mer_set, min_hash, calculate_jaccard, calculate_true_jaccard, containment_min_hash, estimate_edit_distance
 from edit_distance_DP import edDistDp
 from collections import namedtuple
-
+import glob
 
 def test(seq1, seq2, kmer_len, num_hash):
-	"""
-	TODO: Call methods you want to profile here
-	"""
 
 	#true_edit_dist = edDistDp(seq1, seq2)
 
@@ -44,33 +41,166 @@ def test(seq1, seq2, kmer_len, num_hash):
 
 	output = '{} \t {} \t {} \t {} \t {} \t {} \t {} \t'.format(len_x, len_y, truejaccard, jaccard1, jaccard2, jaccard3, jaccard4)
 	return output
-	
-	#est_edit_dist3 = estimate_edit_distance(jaccard3, len_x, len_y)
 
-	#f.write("(%d, %d)\t%d\t%f\t%d\t%f\t%f\t%d\t%f\t%d" % (i, j, true_edit_dist[0], jaccard1, est_edit_dist1[0], jaccard2, est_edit_dist2[0], jaccard3, est_edit_dist3[0]))
+def ED_main():
+	'''
+	Combine all outputs (jaccard similarities and true edit distance) from our synthetic data.
+	Calculate the estimated edit distance and output result in single file
+	'''
+	kmer_len = 16
+	num_hash = 128
+
+	hash_files = ['output/synth_{}_hash.txt'.format(i) for i in range(1, 11)]
+	trueED_files = ['output/synth_{}_editdistance.txt'.format(i) for i in range(1, 11)]
+	for i in range(1, 11):
+		for j in range(5):
+			hash_files.append('synth_output/synth_{}_{}_hash.txt'.format(i, j))
+			trueED_files.append('synth_output/synth_{}_{}_editdistance.txt'.format(i, j))
+
+	print(len(hash_files))
+
+	output_file = 'output/synthdata_estimated_editdistance.txt'
+	fo = open(output_file, 'w')
+	output_header = ['len_x', 'len_y', 'TJ', 'J1', 'J2', 'J3', 'J4', 'trueED', 
+	'TED[0]', 'TED[1]', 'TED[2]', 'ED1[0]', 'ED1[1]', 'ED1[2]', 'ED2[0]', 'ED2[1]', 'ED2[2]', 
+	'ED3[0]', 'ED3[1]', 'ED3[2]', 'ED4[0]', 'ED4[1]', 'ED4[2]']
+	output = '\t'.join(output_header)
+	fo.write(output + '\n')
+
+	for i in range(len(hash_files)):
+		hf_name = hash_files[i]
+		ed_name = trueED_files[i]
+
+		with open(hf_name) as f: 
+			temp = f.readline()
+			[len_x, len_y, TJ, J1, J2, J3, J4] = temp.split()
+
+		with open(ed_name) as f: 
+			temp = f.readline()
+			[len_x1, len_y1, trueED] = temp.split()
+			assert len_x == len_x1
+			assert len_y == len_y1
+
+		TED = estimate_edit_distance(TJ, len_x, len_y, kmer_len)
+		ED1 = estimate_edit_distance(J1, len_x, len_y, kmer_len)
+		ED2 = estimate_edit_distance(J2, len_x, len_y, kmer_len)
+		ED3 = estimate_edit_distance(J3, len_x, len_y, kmer_len)
+		ED4 = estimate_edit_distance(J4, len_x, len_y, kmer_len)
+
+		output_list = [len_x, len_y, TJ, J1, J2, J3, J4, trueED, TED[0], TED[1], TED[2], 
+		ED1[0], ED1[1], ED1[2], ED2[0], ED2[1], ED2[2], ED3[0], ED3[1], ED3[2], ED4[0], ED4[1], ED4[2]]
+		output = '\t'.join(str(e) for e in output_list)
+		fo.write(output + '\n')
+
+	fo.close()
+
+def ecoli_main():
+	'''
+	Get Jaccard similarity for the ecoli read pairs. 
+	Calculate the estimated edit distance and output combined result in single file
+	'''
+	
+	# Input and output files
+	seq_file = 'data/ecoli_realdata.txt'
+	ED_file = 'output/.txt'
+	hash_output_file = 'output/ecoli_hash.txt'
+	ed_output_file = 'output/ecoli_estimated_editdistance.txt'
+
+	# Parameters
+	kmer_len = 16
+	num_hash = 128
+
+	# Calculate Jaccard similarity for all pairs, output to hash_output_file
+	f = open(seq_file, 'r')
+	fo = open(hash_output_file, 'w')
+
+	for i in range(0, 600, 2):
+		seq1 = f.readline()
+		seq2 = f.readline()
+		output = test(seq1, seq2, kmer_len, num_hash)
+		fo.write(output + '\n')
+	fo.close()
+	f.close()
+
+	# Calculate estimated edit distance for all pairs, output to ed_output_file
+	f_ed = open(ED_file, 'r')
+	f_h = open(hash_output_file, 'r')
+
+	fo = open(ed_output_file, 'w')
+	output_header = ['len_x', 'len_y', 'TJ', 'J1', 'J2', 'J3', 'J4', 'trueED', 
+	'TED[0]', 'TED[1]', 'TED[2]', 'ED1[0]', 'ED1[1]', 'ED1[2]', 'ED2[0]', 'ED2[1]', 'ED2[2]', 
+	'ED3[0]', 'ED3[1]', 'ED3[2]', 'ED4[0]', 'ED4[1]', 'ED4[2]']
+	output = '\t'.join(output_header)
+	fo.write(output + '\n')
+
+	for i in range(0, 600, 2):
+		temp = f_h.readline()
+		[len_x, len_y, TJ, J1, J2, J3, J4] = temp.split()
+
+		temp = f_ed.readline()
+		[len_x1, len_y1, trueED] = temp.split()
+		assert len_x == len_x1
+		assert len_y == len_y1
+
+		TED = estimate_edit_distance(TJ, len_x, len_y, kmer_len)
+		ED1 = estimate_edit_distance(J1, len_x, len_y, kmer_len)
+		ED2 = estimate_edit_distance(J2, len_x, len_y, kmer_len)
+		ED3 = estimate_edit_distance(J3, len_x, len_y, kmer_len)
+		ED4 = estimate_edit_distance(J4, len_x, len_y, kmer_len)
+
+		output_list = [len_x, len_y, TJ, J1, J2, J3, J4, trueED, TED[0], TED[1], TED[2], 
+		ED1[0], ED1[1], ED1[2], ED2[0], ED2[1], ED2[2], ED3[0], ED3[1], ED3[2], ED4[0], ED4[1], ED4[2]]
+		output = '\t'.join(str(e) for e in output_list)
+		fo.write(output + '\n')
+
+	fo.close()
+	f.close()
 
 def synth_main():
 
-	filenames1 = ['data/synth_{}.txt'.format(i) for i in range(1,11)]
-	filenames2 = ['data/synth_{}_edited.txt'.format(i) for i in range(1, 11)]
+	# For running the firt 10 files
+	# filenames1 = ['data/synth_{}.txt'.format(i) for i in range(1,11)]
+	# filenames2 = ['data/synth_{}_edited.txt'.format(i) for i in range(1, 11)]
+
+	# kmer_len = 16
+	# num_hash = 128
+
+	# for i in range(1, 11):
+	# 	fn1 = filenames1[i-1]
+	# 	fn2 = filenames2[i-1]
+	# 	with open(fn1) as f:
+	# 		seq1 = f.readline()
+	# 	with open(fn2) as f:
+	# 		seq2 = f.readline()
+
+	# 	fo_name = 'output/synth_{}_hash.txt'.format(i)
+	# 	fo = open(fo_name, 'w')
+	# 	output = test(seq1, seq2, kmer_len, num_hash)
+	# 	fo.write(output)
+	# 	print("%d completed" % i)
+	# 	fo.close
+
+	filenames1 = ['synth_data/synth_{}.txt'.format(i) for i in range(1,11)]
 
 	kmer_len = 16
 	num_hash = 128
 
 	for i in range(1, 11):
 		fn1 = filenames1[i-1]
-		fn2 = filenames2[i-1]
-		with open(fn1) as f:
-			seq1 = f.readline()
-		with open(fn2) as f:
-			seq2 = f.readline()
+		filenames2 = glob.glob('synth_data/synth_1_edited_*.txt')
 
-		fo_name = 'output/synth_{}_hash.txt'.format(i)
-		fo = open(fo_name, 'w')
-		output = test(seq1, seq2, kmer_len, num_hash)
-		fo.write(output)
-		print("%d completed" % i)
-		fo.close
+		with open(fn1) as f1:
+			seq1 = f1.readline()
+			for j in range(5):
+				fn2 = filenames2[j]
+				with open(fn2) as f2:
+					seq2 = f2.readline()
+				fo_name = 'synth_output/synth_{}_{}_hash.txt'.format(i, j)
+				fo = open(fo_name, 'w')
+				output = test(seq1, seq2, kmer_len, num_hash)
+				fo.write(output)
+				print("%d, %d completed" % (i, j))
+				fo.close()
 
 def main():
 
