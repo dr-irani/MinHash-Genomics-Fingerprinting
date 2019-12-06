@@ -156,13 +156,32 @@ def calculate_containment_coeff(c, fp, num_hash, seqset):
 	return len(seqset) * c / ()
 
 
-def calculate_jaccard(n, m, k, f1, f2):
-	if n == m:
-		return np.sum(f1==f2) / k
+def calculate_jaccard(k, f1, f2):
+	''' Calculate Jaccard similarity '''
+	s1 = set(f1)
+	s2 = set(f2)
+	union = list(s1.union(s2))
+	union = set(union[:k])
+	inter = s1.intersection(s2, union)
+
+	return len(inter)/k
+
+def estimate_edit_distance(jaccard, len_x, len_y):
+	if len_x == len_y:
+		return [jaccard * len_x]
+	else:
+		alpha = min(len_x, len_y) / max(len_x, len_y)
+		return [1 - alpha, (1+alpha) * (jaccard/(2-jaccard))]
+
+def mash_distance(jaccard, kmer_len):
+	# this seems to be pretty different from the actual edit distance though..
+	# correlation yes, but very different scale
+	
+	return (-1/kmer_len) * np.log(2 * jaccard / (1 + jaccard))
+
 
 def main():
 	args = get_args()
-	# Place hyperparameters here
 	num_hash = args.n
 	kmer_len = args.k 
 	stride_len = args.s
@@ -198,8 +217,9 @@ def main():
 
 	
 	print(est_edit_dist)
+	print(mash_dist)
 	print(elapsed_time)
-
 
 if __name__ == '__main__':
 	main()
+	

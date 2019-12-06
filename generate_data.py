@@ -10,7 +10,7 @@ bases = list('GTCA')
 def random_seq(seq_len):
 	return ''.join(np.random.choice(bases,seq_len))
 	
-def gen_random_seq(filename, seq_len, num_seq):
+def gen_random_seq(filename, seq_len, num_seq = None):
 	'''
 	Generate and return random GTCA sequence of length seq_len.
 	'''
