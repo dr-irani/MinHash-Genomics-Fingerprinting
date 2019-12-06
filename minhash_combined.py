@@ -4,6 +4,7 @@ import numpy as np
 import argparse
 import time
 import copy
+import math
 from collections import namedtuple
 
 
@@ -136,11 +137,13 @@ def min_hash(seqset, num_hash, method, hash_fxns=None):
 
 	if method == "kpartition":
 		# MinHash with k partitions
-		# Literature suggested using the first few bits...but I'm going to try mod
+		# Literature suggested using the first few bits
+		num_bit = int(math.log2(num_hash))
 		h = hash_fxns[0]
 		for kmer in seqset:
 			hval = apply_hash(h, kmer)
-			i = hval % num_hash
+			binary = bin(hval)
+			i = int(binary[2:num_bit+2], 2)
 			fingerprint[i] = min(fingerprint[i], hval)
 	return fingerprint, hash_fxns
 
@@ -160,8 +163,8 @@ def calculate_true_jaccard(s1, s2):
 	union = s1.union(s2)
 	inter = s1.intersection(s2)
 
-	return union/inter
-	
+	return len(inter)/len(union)
+
 def calculate_jaccard(k, f1, f2):
 	''' Calculate Jaccard similarity '''
 	s1 = set(f1)

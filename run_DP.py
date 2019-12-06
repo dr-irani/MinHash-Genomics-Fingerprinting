@@ -1,32 +1,50 @@
 import random
 import gc
 from edit_distance_DP import edDistDp
+import re
 
-def calculate_metrics(i, j, seq1, seq2):
+def calculate_metrics(seq1, seq2):
 
 	edit_distance = edDistDp(seq1, seq2)
-	output = "{} \t {} \t {} \t {} \n".format((i, j), len(seq1), len(seq2), edit_distance) # 7 outputs
+	output = "{} \t {} \t {} \n".format(len(seq1), len(seq2), edit_distance) # 7 outputs
 	return output
 
 def simulated_data():
 	
-	filename = 'data/random_10000bp_50seq.txt'
+	filenames1 = ['data/synth_{}.txt'.format(i) for i in range(1,11)]
+	filenames2 = ['data/synth_{}_edited.txt'.format(i) for i in range(1, 11)]
 	reads = []
-	with open(filename) as f:
-		seq = f.readline()
-		while seq:
-			reads.append(seq)
-			seq = f.readline()
 
-	fo_name = 'random_simulated_true_editdistance.txt'
-	fo = open(fo_name, 'w')
-	fo.write("{} \t {} \t {} \t {} \n".format("indexID", "len(seq1)", "len(seq2)", "edit_distance"))
-	for i in range(len(reads)):
-		for j in range(i+1, len(reads)):
-			output = calculate_metrics(i, j, reads[i], reads[j])
-			fo.write(output)
-			print("%d, %d completed" % (i, j))
-	fo.close
+	for i in range(1, 11):
+		fn1 = filenames1[i-1]
+		fn2 = filenames2[i-1]
+		with open(fn1) as f:
+			seq1 = f.readline()
+		with open(fn2) as f:
+			seq2 = f.readline()
+
+		fo_name = 'output/synth_{}_editdistance.txt'.format(i)
+		fo = open(fo_name, 'w')
+		output = calculate_metrics(seq1, seq2)
+		fo.write(output)
+		print("%d completed" % i)
+		fo.close
+
+	# with open(filename) as f:
+	# 	seq = f.readline()
+	# 	while seq:
+	# 		reads.append(seq)
+	# 		seq = f.readline()
+
+	# fo_name = 'random_simulated_true_editdistance.txt'
+	# fo = open(fo_name, 'w')
+	# fo.write("{} \t {} \t {} \t {} \n".format("indexID", "len(seq1)", "len(seq2)", "edit_distance"))
+	# for i in range(len(reads)):
+	# 	for j in range(i+1, len(reads)):
+	# 		output = calculate_metrics(i, j, reads[i], reads[j])
+	# 		fo.write(output)
+	# 		print("%d, %d completed" % (i, j))
+	# fo.close
 
 def real_ecoli_data():
 
@@ -56,7 +74,7 @@ if __name__ == '__main__':
 	
 	simulated_data()
 	print("Finished running simulated data")
-	real_ecoli_data()
-	print("Finished running real ecoli data")
+	# real_ecoli_data()
+	# print("Finished running real ecoli data")
 
 	
