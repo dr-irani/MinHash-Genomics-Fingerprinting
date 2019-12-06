@@ -3,7 +3,6 @@ import xxhash
 import numpy as np
 import argparse
 import time
-import copy
 from collections import namedtuple
 
 
@@ -28,7 +27,6 @@ class BloomFilter(object):
 		for i in range(self.num_hash):
 			idx = self.hash(kmer, i)
 			self.filter[idx] = 1
-			# self.num_kmers += 1
 
 	def find(self, kmer):
 		for i in range(self.num_hash):
@@ -37,7 +35,7 @@ class BloomFilter(object):
 		return True
 
 	def union(self, kmers):
-		union_filter = copy.deepcopy(self.filter)
+		union_filter = np.zeros(self.size)
 		for kmer in kmers:
 			for i in range(self.num_hash):
 				idx = self.hash(kmer, i)
@@ -151,9 +149,10 @@ def containment_min_hash(seqset, larger_set=None, bloom_filter=None):
 		for kmer in seqset:
 			bloom_filter.add(kmer)
 		return bloom_filter
-	intersection = len(seqset) + bloom_filter.num_kmers - np.count_nonzero(bloom_filter.union(seqset)) / bloom_filter.num_hash
-	containment = intersection / len(seqset)
-	return intersection / (len(larger_set.union(seqset)))
+
+	union = -bloom_filter.size / bloom_filter.num_hash * np.log(1 -  np.count_nonzero(bloom_filter.union(seqset)) / bloom_filter.size)
+	intersection = len(seqset) + bloom_filter.num_kmers - union
+	return intersection / union 
 
 
 def calculate_jaccard(k, f1, f2):
@@ -205,11 +204,11 @@ def main():
 		fp1, hash_fxns = min_hash(sets[0].set, num_hash, method=method)
 		fp2, hash_fxns = min_hash(sets[1].set, num_hash, method=method, hash_fxns=hash_fxns)
 		jaccard = calculate_jaccard(num_hash, fp1, fp2)
-		mash_dist = mash_distance(jaccard, kmer_len)
+	mash_dist = mash_distance(jaccard, kmer_len)
 
 	est_edit_dist = estimate_edit_distance(jaccard, sets[0].len, sets[1].len)
 
-	print(jaccard)
+	print(jaccard, mash_dist)
 	print("edit dist", est_edit_dist)
 	# print(elapsed_time)
 
