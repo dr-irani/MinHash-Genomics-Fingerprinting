@@ -18,7 +18,7 @@ class BloomFilter(object):
 		return int(-(kmers * np.log(self.fp_prob)) / np.log(2) ** 2)
 
 	def calculate_num_hashes(self, kmers):
-		return int(self.size / kmers * np.log(2))
+		return int(np.log(2) * self.size / kmers)
 
 	def hash(self, kmer, i):
 		return xxhash.xxh32(kmer, seed=i).intdigest() % self.size
@@ -93,17 +93,14 @@ def gen_k_hash_functions(k):
 	return [xxhash.xxh32(seed=seed) for seed in random_seeds]
 
 
-def min_hash(seqset, num_hash, method, hash_fxns=None, bloom_filter=None):
+def min_hash(seqset, num_hash, method, hash_fxns=None):
 	'''
 	Return MinHash fingerprint the input sequence and the hash function(s) used.
 	3 methods: khash, bottomk, kpartition
 	Each hash key is a kmer of length kmer_len.
 	'''
 	fingerprint = [0]*num_hash
-	if hash_fxns == None:
-		hash_fxns = gen_k_hash_functions(1)
-	h = hash_fxns[0]
-
+	hash_fxns = gen_k_hash_functions(1) if hash_fxns == None else hash_fxns
 
 	if method == "khash":
 		# MinHash with k hash functions
@@ -119,7 +116,8 @@ def min_hash(seqset, num_hash, method, hash_fxns=None, bloom_filter=None):
 			fingerprint[hash_index] = min_hval
 
 	if method == "bottomk":
-		# MinHash with bottom k hashes		
+		# MinHash with bottom k hashes
+		h = hash_fxns[0]		
 		hashes = []
 		for kmer in seqset:
 			hashes.append(apply_hash(h, kmer))
@@ -129,6 +127,7 @@ def min_hash(seqset, num_hash, method, hash_fxns=None, bloom_filter=None):
 	if method == "kpartition":
 		# MinHash with k partitions
 		# Literature suggested using the first few bits...but I'm going to try mod
+		h = hash_fxns[0]
 		for kmer in seqset:
 			hval = apply_hash(h, kmer)
 			i = hval % num_hash
