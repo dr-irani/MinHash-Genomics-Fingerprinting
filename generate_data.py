@@ -16,7 +16,7 @@ def gen_random_seq(filename, seq_len, num_seq):
 	'''
 	f = open(filename,'w')
 	for i in range(num_seq):
-		f.write(random_seq(seq_len)) 
+		f.write(random_seq(seq_len) + "\n") 
 	f.close()
 
 def sample_indices(size, num_indices):
