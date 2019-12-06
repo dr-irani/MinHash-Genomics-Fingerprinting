@@ -4,6 +4,21 @@ import numpy as np
 import argparse
 import time
 
+
+def get_args():
+	parser = argparse.ArgumentParser()
+
+	# Change according to how you are passing in your input files
+	parser.add_argument("-f1", help="Path of sequence1 .txt file", required=True)
+	parser.add_argument("-f2", help="Path of sequence2 .txt file", required=True)
+	
+	parser.add_argument("-n", help="Length of fingerprint", required=True, type=int)
+	parser.add_argument("-k", help="Length of kmer", required=True, type=int)
+	parser.add_argument("-s", help="Length of stride", required=True, type=int)
+	args = parser.parse_args()
+	return args
+
+
 '''
 Possible areas for improvement:
 	- Loop ordering: Get k hash values at every kmer? (in other words, one iteration through read)
@@ -57,12 +72,15 @@ def min_hash(seqset, num_hash, method, hash_fxns = None):
 	Each hash key is a kmer of length kmer_len.
 	'''
 	fingerprint = [0]*num_hash
+	if hash_fxns == None:
+		hash_fxns = gen_k_hash_functions(1)
+		h = hash_fxns[0]
 
 
 	if method == "khash":
 		# MinHash with k hash functions
 		
-		if hash_fxns == None or len(hash_fxns) != num_hash:	
+		if len(hash_fxns) != num_hash:	
 			hash_fxns = gen_k_hash_functions(num_hash)
 		
 		for hash_index, h in enumerate(hash_fxns): 
@@ -73,12 +91,7 @@ def min_hash(seqset, num_hash, method, hash_fxns = None):
 			fingerprint[hash_index] = min_hval
 
 	if method == "bottomk":
-		# MinHash with bottom k hashes
-
-		if hash_fxns == None:
-			hash_fxns = gen_k_hash_functions(1)
-			h = hash_fxns[0]
-		
+		# MinHash with bottom k hashes		
 		hashes = []
 		for kmer in seqset:
 			hashes.append(apply_hash(h, kmer))
@@ -87,56 +100,40 @@ def min_hash(seqset, num_hash, method, hash_fxns = None):
 
 	if method == "kpartition":
 		# MinHash with k partitions
-
-		if hash_fxns == None:
-			hash_fxns = gen_k_hash_functions(1)
-			h = hash_fxns[0]
-
 		# Literature suggested using the first few bits...but I'm going to try mod
 		for kmer in seqset:
 			hval = apply_hash(h, kmer)
 			i = hval % k
 			fingerprint[i] = min(fingerprint[i], hval)
 
-	return fingerprint, hash_fxns
+	if method == "minimizerSeq":
+		# MinHash that stores minimizer sequences
+		pass
+
+	# return fingerprint, hash_fxns
 
 
 def calculate_jaccard(n, m, k, f1, f2):
 	if n == m:
 		return np.sum(f1==f2) / k
 
-if __name__ == '__main__':
-	
-	parser = argparse.ArgumentParser()
-
-	# Change according to how you are passing in your input files
-	parser.add_argument("-f1", help="Path of sequence1 .txt file", required=True)
-	parser.add_argument("-f2", help="Path of sequence2 .txt file", required=True)
-	
-	parser.add_argument("-n", help="Length of fingerprint", required=True, type=int)
-	parser.add_argument("-k", help="Length of kmer", required=True, type=int)
-	parser.add_argument("-s", help="Length of stride", required=True, type=int)
-	args = parser.parse_args()
-
+def main():
+	args = get_args()
 	# Place hyperparameters here
 	num_hash = args.n
 	kmer_len = args.k 
 	stride_len = args.s
 
-	fh1 = args.f1
-	fh2 = args.f2
+	with open(args.f1, 'r') as f:
+		seq = f.read()
+		n = len(seq)
+		set1 = create_k_mer_set(seq, kmer_len, stride_len)
 
-	f = open(fh1, 'r')
-	seq = f.read()
-	n = len(seq)
-	f.close
-	set1 = create_k_mer_set(seq, kmer_len, stride_len)
+	with open(args.f2, 'r') as f:
+		seq = f.read()
+		m = len(seq)
+		set2 = create_k_mer_set(seq, kmer_len, stride_len)
 
-	f = open(fh1, 'r')
-	seq = f.read()
-	m = len(seq)
-	f.close
-	set2 = create_k_mer_set(seq, kmer_len, stride_len)
 
 	start_time = time.time()
 	fp1, hash_fxns = min_hash(set1, num_hash, method='khash')
@@ -150,3 +147,7 @@ if __name__ == '__main__':
 	print(np.count_nonzero(fp1 == fp2))
 	print(est_edit_dist)
 	print(elapsed_time)
+
+
+if __name__ == '__main__':
+	main()
