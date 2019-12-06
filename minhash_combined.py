@@ -3,21 +3,22 @@ import xxhash
 import numpy as np
 import argparse
 import time
+from collections import namedtuple
 
 
 class BloomFilter(object):
 	def __init__(self, kmers, fp_prob=0.01):
 		self.fp_prob = fp_prob
-		self.num_kmers = kmers
-		self.size = self.calculate_size()
-		self.num_hash = self.calculate_num_hashes()
+		self.num_kmers = 0
+		self.size = self.calculate_size(kmers)
+		self.num_hash = self.calculate_num_hashes(kmers)
 		self.filter = np.zeros(self.size)
 
-	def calculate_size(self):
-		return int(-(self.num_kmers * np.log(self.fp_prob)) / np.log(2) ** 2)
+	def calculate_size(self, kmers):
+		return int(-(kmers * np.log(self.fp_prob)) / np.log(2) ** 2)
 
-	def calculate_num_hashes(self):
-		return int(self.size / self.num_kmers * np.log(2))
+	def calculate_num_hashes(self, kmers):
+		return int(self.size / kmers * np.log(2))
 
 	def hash(self, kmer, i):
 		return xxhash.xxh32(kmer, seed=i).intdigest() % self.size
@@ -25,7 +26,8 @@ class BloomFilter(object):
 	def add(self, kmer):
 		for i in range(self.num_hash):
 			idx = self.hash(kmer, i)
-			self.filter[idx] == 1
+			self.filter[idx] = 1
+			self.num_kmers += 1
 
 	def find(self, kmer):
 		for i in range(self.num_hash):
@@ -134,26 +136,19 @@ def min_hash(seqset, num_hash, method, hash_fxns=None, bloom_filter=None):
 	return fingerprint, hash_fxns
 
 
-def containment_min_hash(seqset, num_hash, bloom_filter=None):
+def containment_min_hash(seqset, bloom_filter=None):
 	if bloom_filter is None:
 		bloom_filter = BloomFilter(len(seqset))
-		map(bloom_filter.add, seqset)
+		for kmer in seqset:
+			bloom_filter.add(kmer)
 		return bloom_filter
-		# for kmer in seqset:
-		# 	bloom_filter.add(kmer)
 	containment = 0
 	for kmer in seqset:
 		containment += 1 if bloom_filter.find(kmer) else 0
-	containment -= np.round(bloom_filter.fp_prob * num_hash)
-	containment /= num_hash
-	return len(seqset) * containment / (len(seqset) + bloom_filter.num_kmers - len(seqset) * containment)
-
-
-
-def calculate_containment_coeff(c, fp, num_hash, seqset):
-	c -= np.round(fp_prob * num_hash)
-	c = c / num_hash
-	return len(seqset) * c / ()
+	containment -= np.round(bloom_filter.fp_prob * bloom_filter.num_hash)
+	containment /= bloom_filter.num_hash
+	# print(containment, len(seqset), len(seqset) + bloom_filter.num_kmers, containment * len(seqset))
+	return containment * len(seqset) / (len(seqset) + bloom_filter.num_kmers)
 
 
 def calculate_jaccard(k, f1, f2):
@@ -181,6 +176,7 @@ def mash_distance(jaccard, kmer_len):
 
 
 def main():
+	SeqSet = namedtuple('SeqSet', 'set len')
 	args = get_args()
 	num_hash = args.n
 	kmer_len = args.k 
@@ -189,36 +185,35 @@ def main():
 
 	with open(args.f1, 'r') as f:
 		seq = f.read()
-		n = len(seq)
-		set1 = create_k_mer_set(seq, kmer_len, stride_len)
+		set1 = SeqSet(create_k_mer_set(seq, kmer_len, stride_len), len(seq))
 
 	with open(args.f2, 'r') as f:
 		seq = f.read()
-		m = len(seq)
-		set2 = create_k_mer_set(seq, kmer_len, stride_len)
+		set2 = SeqSet(create_k_mer_set(seq, kmer_len, stride_len), len(seq))
 
 
 	start_time = time.time()
-	if method == 'khash':
-		sets = [set1, set2]
-		sets.sort(key=len, reverse=True)
-		bloom_filter = containment_min_hash(sets[0], num_hash)
-		jaccard = containment_min_hash(sets[1], num_hash, bloom_filter=bloom_filter)
+	sets = sorted([set1, set2], key=lambda x: len(x.set), reverse=True)
+	if method == 'containment':
+		print(len(sets[0].set), sets[0].len)
+		bloom_filter = containment_min_hash(sets[0].set)
+		# print(len(bloom_filter.filter), np.count_nonzero(bloom_filter.filter))
+		jaccard = containment_min_hash(sets[1].set, bloom_filter=bloom_filter)
 	else:
-		fp1, hash_fxns = min_hash(set1, num_hash, method=method)
-		fp2, hash_fxns = min_hash(set2, num_hash, method=method, hash_fxns=hash_fxns)
-		jaccard = calculate_jaccard(n, m, num_hash, fp1, fp2)
-		print(fp1)
-		print(fp2)
-		print(np.count_nonzero(fp1 == fp2))
+		fp1, hash_fxns = min_hash(sets[0].set, num_hash, method=method)
+		fp2, hash_fxns = min_hash(sets[1].set, num_hash, method=method, hash_fxns=hash_fxns)
+		jaccard = calculate_jaccard(num_hash, fp1, fp2)
+		# print(fp1)
+		# print(fp2)
+		# print(np.count_nonzero(fp1 == fp2))
 
-	est_edit_dist = int(jaccard * n)
+	print("jaccard", jaccard)
+	est_edit_dist = int(jaccard * sets[0].len)
 	elapsed_time = time.time() - start_time
 
 	
-	print(est_edit_dist)
-	print(mash_dist)
-	print(elapsed_time)
+	print("edit dist", est_edit_dist)
+	# print(elapsed_time)
 
 if __name__ == '__main__':
 	main()
