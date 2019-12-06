@@ -156,6 +156,12 @@ def containment_min_hash(seqset, larger_set=None, bloom_filter=None):
 	return intersection / (len(larger_set.union(seqset)))
 
 
+def calculate_true_jaccard(s1, s2):
+	union = s1.union(s2)
+	inter = s1.intersection(s2)
+
+	return union/inter
+	
 def calculate_jaccard(k, f1, f2):
 	''' Calculate Jaccard similarity '''
 	s1 = set(f1)
