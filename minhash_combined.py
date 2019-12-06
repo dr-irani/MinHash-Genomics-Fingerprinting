@@ -20,7 +20,7 @@ def create_k_mer_set(seq, kmer_len, stride_len):
 	'''
 	kmer_set = set()
 	i = 0
-	while i + kmer_len < n: 
+	while i + kmer_len < len(seq): 
 		kmer = seq[i:i+kmer_len]
 		kmer_set.add(kmer)
 		i += stride_len
@@ -101,12 +101,27 @@ def min_hash(seqset, num_hash, method, hash_fxns = None):
 	return fingerprint, hash_fxns
 
 
-def calculate_jaccard(n, m, k, f1, f2):
-	if n == m:
-		return np.sum(f1==f2) / k
+def calculate_jaccard(k, f1, f2):
+	''' Calculate Jaccard similarity '''
+	s1 = set(f1)
+	s2 = set(f2)
+	union = list(s1.union(s2))
+	union = set(union[:k])
+	inter = s1.intersection(s2, union)
 
-if __name__ == '__main__':
-	
+	return len(inter)/k
+
+def estimate_edit_distance(jaccard, len_x, len_y):
+	if len_x == len_y:
+		return [jaccard * len_x]
+	else:
+		alpha = min(len_x, len_y) / max(len_x, len_y)
+		return [1 - alpha, (1+alpha) * (jaccard/(2-jaccard))]
+
+def mash_distance(jaccard, kmer_len):
+	return (-1/kmer_len) * np.log(2 * jaccard / (1 + jaccard))
+
+def main():
 	parser = argparse.ArgumentParser()
 
 	# Change according to how you are passing in your input files
@@ -128,21 +143,22 @@ if __name__ == '__main__':
 
 	f = open(fh1, 'r')
 	seq = f.read()
-	n = len(seq)
+	len_x = len(seq)
 	f.close
 	set1 = create_k_mer_set(seq, kmer_len, stride_len)
 
 	f = open(fh1, 'r')
 	seq = f.read()
-	m = len(seq)
+	len_y = len(seq)
 	f.close
 	set2 = create_k_mer_set(seq, kmer_len, stride_len)
 
 	start_time = time.time()
 	fp1, hash_fxns = min_hash(set1, num_hash, method='khash')
 	fp2, hash_fxns = min_hash(set2, num_hash, method='khash', hash_fxns=hash_fxns)
-	jaccard = calculate_jaccard(n, m, num_hash, fp1, fp2)
-	est_edit_dist = int(jaccard * n)
+	jaccard = calculate_jaccard(num_hash, fp1, fp2)
+	est_edit_dist = estimate_edit_distance(jaccard, len_x, len_y)
+	mash_dist = mash_distance(jaccard, kmer_len)
 	elapsed_time = time.time() - start_time
 
 	print(fp1)
@@ -150,3 +166,8 @@ if __name__ == '__main__':
 	print(np.count_nonzero(fp1 == fp2))
 	print(est_edit_dist)
 	print(elapsed_time)
+	print(mash_dist)
+
+if __name__ == '__main__':
+	main()
+	

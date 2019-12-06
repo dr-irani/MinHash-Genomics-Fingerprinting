@@ -1,5 +1,7 @@
 import sys
-
+'''
+Process fastq file to save real Ecoli dataset
+'''
 def parse_fastq(f, fo):
 	''' 
 	13124 sequences in ecoli_p6_25x.filtered.fastq. 
