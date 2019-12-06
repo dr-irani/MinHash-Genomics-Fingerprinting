@@ -52,8 +52,8 @@ def perturb_seq(filename, num_ins=0, num_del=0, num_swp=0):
 	'''
 	Given sequence seq, perturb with deletions/insertions/swaps
 	'''
-	# Generate list of indices to insert edits (random pernutation)
-	# Assign edit to each index, then sort
+	# Generate list of indices to insert edits (uniformly random permutation)
+	# Assign edit type to each index, then sort to add the edits later
 	f = open(filename, 'r')
 	seq = f.read()
 	f.close()
@@ -63,9 +63,9 @@ def perturb_seq(filename, num_ins=0, num_del=0, num_swp=0):
 	edit_labels = (['INS']*num_ins) + (['DEL']*num_del) + (['SWP']*num_swp)
 	edits = sorted(zip(edit_indices, edit_labels))
 
-	dst_file = "{}_edited_{}i_{}d_{}s.txt".format(filename, num_ins, num_del, num_swp)
+	dst_file = "{}_edited_{}i_{}d_{}s.txt".format(filename.split('.')[0], num_ins, num_del, num_swp)
 	f = open(dst_file, 'w')
-	# Construct edited sequence and write t0 file
+	# Construct edited sequence and write to file
 	prev = 0
 	for i, edit in edits:
 		if edit == 'INS':
@@ -79,7 +79,6 @@ def perturb_seq(filename, num_ins=0, num_del=0, num_swp=0):
 		prev = i+1
 	f.write(seq[prev:seq_len])
 	f.close()
-	# return edit_seq
 
 def get_args():
 	parser = argparse.ArgumentParser(description="Generate random data")
