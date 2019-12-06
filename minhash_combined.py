@@ -51,6 +51,8 @@ def get_args():
 	parser.add_argument("-n", help="Length of fingerprint", required=True, type=int)
 	parser.add_argument("-k", help="Length of kmer", required=True, type=int)
 	parser.add_argument("-s", help="Length of stride", required=True, type=int)
+	parser.add_argument("-m", help="Use multi hash layers", required=False, default=False, type=bool)
+
 	args = parser.parse_args()
 	return args
 
@@ -143,7 +145,7 @@ def min_hash(seqset, num_hash, method, hash_fxns=None):
 	return fingerprint, hash_fxns
 
 
-def containment_min_hash(seqset, larger_set=None, bloom_filter=None):
+def containment_min_hash(seqset, bloom_filter=None):
 	if bloom_filter is None:
 		bloom_filter = BloomFilter(len(seqset))
 		for kmer in seqset:
@@ -152,8 +154,11 @@ def containment_min_hash(seqset, larger_set=None, bloom_filter=None):
 
 	union = -bloom_filter.size / bloom_filter.num_hash * np.log(1 -  np.count_nonzero(bloom_filter.union(seqset)) / bloom_filter.size)
 	intersection = len(seqset) + bloom_filter.num_kmers - union
-	return intersection / union 
+	return intersection / union
 
+
+def hash_kmers(seqset, seed=0):
+	return set([xxhash.xxh32(kmer, seed=seed).hexdigest() for kmer in seqset])
 
 def calculate_true_jaccard(s1, s2):
 	union = s1.union(s2)
@@ -181,9 +186,7 @@ def estimate_edit_distance(jaccard, len_x, len_y):
 def mash_distance(jaccard, kmer_len):
 	# this seems to be pretty different from the actual edit distance though..
 	# correlation yes, but very different scale
-	
 	return (-1/kmer_len) * np.log(2 * jaccard / (1 + jaccard))
-
 
 def main():
 	SeqSet = namedtuple('SeqSet', 'set len')
@@ -191,7 +194,7 @@ def main():
 	num_hash = args.n
 	kmer_len = args.k 
 	stride_len = args.s
-	method = 'containment'
+	method = 'khash'
 
 	with open(args.f1, 'r') as f:
 		seq = f.read()
@@ -203,12 +206,15 @@ def main():
 
 	start_time = time.time()
 	sets = sorted([set1, set2], key=lambda x: len(x.set), reverse=True)
+	set1 = hash_kmers(sets[0].set) if args.m else sets[0].set
+	set2 = hash_kmers(sets[1].set) if args.m else sets[1].set
+
 	if method == 'containment':
-		bloom_filter = containment_min_hash(sets[0].set)
-		jaccard = containment_min_hash(sets[1].set, sets[0].set, bloom_filter=bloom_filter)
+		bloom_filter = containment_min_hash(set1)
+		jaccard = containment_min_hash(set2, bloom_filter=bloom_filter)
 	else:
-		fp1, hash_fxns = min_hash(sets[0].set, num_hash, method=method)
-		fp2, hash_fxns = min_hash(sets[1].set, num_hash, method=method, hash_fxns=hash_fxns)
+		fp1, hash_fxns = min_hash(set1, num_hash, method=method)
+		fp2, hash_fxns = min_hash(set2, num_hash, method=method, hash_fxns=hash_fxns)
 		jaccard = calculate_jaccard(num_hash, fp1, fp2)
 	mash_dist = mash_distance(jaccard, kmer_len)
 
