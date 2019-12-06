@@ -102,7 +102,7 @@ def min_hash(seqset, num_hash, method, hash_fxns=None, bloom_filter=None):
 	fingerprint = [0]*num_hash
 	if hash_fxns == None:
 		hash_fxns = gen_k_hash_functions(1)
-		h = hash_fxns[0]
+	h = hash_fxns[0]
 
 
 	if method == "khash":
@@ -131,7 +131,7 @@ def min_hash(seqset, num_hash, method, hash_fxns=None, bloom_filter=None):
 		# Literature suggested using the first few bits...but I'm going to try mod
 		for kmer in seqset:
 			hval = apply_hash(h, kmer)
-			i = hval % k
+			i = hval % num_hash
 			fingerprint[i] = min(fingerprint[i], hval)
 	return fingerprint, hash_fxns
 
@@ -163,7 +163,7 @@ def calculate_jaccard(k, f1, f2):
 
 def estimate_edit_distance(jaccard, len_x, len_y):
 	if len_x == len_y:
-		return [jaccard * len_x]
+		return [int(jaccard * len_x)]
 	else:
 		alpha = min(len_x, len_y) / max(len_x, len_y)
 		return [1 - alpha, (1+alpha) * (jaccard/(2-jaccard))]
@@ -191,7 +191,6 @@ def main():
 		seq = f.read()
 		set2 = SeqSet(create_k_mer_set(seq, kmer_len, stride_len), len(seq))
 
-
 	start_time = time.time()
 	sets = sorted([set1, set2], key=lambda x: len(x.set), reverse=True)
 	if method == 'containment':
@@ -200,16 +199,14 @@ def main():
 		# print(len(bloom_filter.filter), np.count_nonzero(bloom_filter.filter))
 		jaccard = containment_min_hash(sets[1].set, bloom_filter=bloom_filter)
 	else:
-		fp1, hash_fxns = min_hash(sets[0].set, num_hash, method=method)
-		fp2, hash_fxns = min_hash(sets[1].set, num_hash, method=method, hash_fxns=hash_fxns)
-		jaccard = calculate_jaccard(num_hash, fp1, fp2)
-		# print(fp1)
-		# print(fp2)
-		# print(np.count_nonzero(fp1 == fp2))
-
-	print("jaccard", jaccard)
-	est_edit_dist = int(jaccard * sets[0].len)
-	elapsed_time = time.time() - start_time
+		fp1, hash_fxns = min_hash(set1, num_hash, method=method)
+		fp2, hash_fxns = min_hash(set2, num_hash, method=method, hash_fxns=hash_fxns)
+		jaccard = calculate_jaccard(n, m, num_hash, fp1, fp2)
+		est_edit_dist = estimate_edit_distance(jaccard, len_x, len_y)
+		mash_dist = mash_distance(jaccard, kmer_len)
+		print(fp1)
+		print(fp2)
+		print(np.count_nonzero(fp1 == fp2))
 
 	
 	print("edit dist", est_edit_dist)

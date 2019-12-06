@@ -10,7 +10,7 @@ bases = list('GTCA')
 def random_seq(seq_len):
 	return ''.join(np.random.choice(bases,seq_len))
 	
-def gen_random_seq(filename, seq_len, num_seq = None):
+def gen_random_seq(filename, seq_len, num_seq = 1):
 	'''
 	Generate and return random GTCA sequence of length seq_len.
 	'''
@@ -112,5 +112,8 @@ if __name__ == '__main__':
 	# if args.edit_mode == True:
 	# 	perturb_seq(args.filename, args.num_inserts, args.num_deletes, args.num_swaps)
 
-	filename = "data/random_10000bp_50seq.txt"
-	gen_random_seq(filename, 10000, 50)
+	filename = "data/random_8000bp.txt"
+	gen_random_seq(filename, 8000)
+
+	filename = "data/random_800bp.txt"
+	gen_random_seq(filename, 800)
