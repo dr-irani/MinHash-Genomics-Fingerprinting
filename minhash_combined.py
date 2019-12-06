@@ -199,14 +199,12 @@ def main():
 		# print(len(bloom_filter.filter), np.count_nonzero(bloom_filter.filter))
 		jaccard = containment_min_hash(sets[1].set, bloom_filter=bloom_filter)
 	else:
-		fp1, hash_fxns = min_hash(set1, num_hash, method=method)
-		fp2, hash_fxns = min_hash(set2, num_hash, method=method, hash_fxns=hash_fxns)
-		jaccard = calculate_jaccard(n, m, num_hash, fp1, fp2)
-		est_edit_dist = estimate_edit_distance(jaccard, len_x, len_y)
+		fp1, hash_fxns = min_hash(sets[0].set, num_hash, method=method)
+		fp2, hash_fxns = min_hash(sets[1].set, num_hash, method=method, hash_fxns=hash_fxns)
+		jaccard = calculate_jaccard(num_hash, fp1, fp2)
 		mash_dist = mash_distance(jaccard, kmer_len)
-		print(fp1)
-		print(fp2)
-		print(np.count_nonzero(fp1 == fp2))
+
+	est_edit_dist = estimate_edit_distance(jaccard, sets[0].len, sets[1].len)
 
 	
 	print("edit dist", est_edit_dist)
