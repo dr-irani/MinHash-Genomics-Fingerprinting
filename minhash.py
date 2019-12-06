@@ -54,36 +54,55 @@ def min_hash(seq, hash_fxns, kmer_len, stride_len):
 	return fingerprint
 
 
-def calculate_jaccard(n, m, k, f1, f2):
-	if n == m:
-		return np.sum(f1==f2) / k
+def calculate_jaccard(f1, f2):
+	'''
+	Given len k fingerprints f1 and f2, return Jaccard coefficient.
+	'''
+	return np.sum(f1==f2) / len(f1)
+
+def approx_edit_distance(J, seq_len):
+	'''
+	Given Jaccard and sequence length, return edit distance.
+	Currently assumes lengths of two seq for this J are equal.
+	'''
+	# TODO: ... a lot; figure out how to return this
+	return int(jaccard/n)
 
 if __name__ == '__main__':
 	# TODO: Handle more elegant arg passing for hyperparameters
 	# Place hyperparameters here
-	num_hash_fxns = 13
-	kmer_len = 20 
-	stride_len = 10
+	num_hash_fxns = 20
+	kmer_len = 16
+	stride_len = 1
+	orig_file = 'data/test.txt'
+	edit_file = 'data/test_edited_0i_0d_100s.txt'
 
 	hash_fxns = gen_k_hash_functions(13)
 
-	f = open('data/test.txt', 'r')
+	# Minhash of original sequence
+	f = open(orig_file, 'r')
 	seq = f.read()
 	f.close()
 	orig_fingerprint = min_hash(seq, hash_fxns, kmer_len, stride_len)
-	# print(fingerprint)
 
-	f = open('data/test.txt_edited_0i_0d_100s.txt', 'r')
+	# Minhash of edited sequence
+	f = open(edit_file, 'r')
 	edit_seq = f.read()
 	f.close()
 	edit_fingerprint = min_hash(seq, hash_fxns, kmer_len, stride_len)
 
-
+	# Debug print statements
+	'''
 	print(orig_fingerprint)
 	print(edit_fingerprint)
 	print(np.count_nonzero(orig_fingerprint == edit_fingerprint))
+	'''
+
+	# Calculate Jaccard and edit distance
 	n,m = len(seq), len(edit_seq) 
-	jaccard = calculate_jaccard(n,m,num_hash_fxns,orig_fingerprint,edit_fingerprint)
-	est_edit_dist = int(jaccard / n)
-	print(est_edit_dist)
+	jaccard = calculate_jaccard(orig_fingerprint,edit_fingerprint)
+	edit_dist = approx_edit_distance(jaccard, n)
+
+	output = "Approximate edit distance between sequences in files \"{}\" and \"{}\" is {}.".format(orig_file, edit_file, edit_dist)
+	print(output)
     
