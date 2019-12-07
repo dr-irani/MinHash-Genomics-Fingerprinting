@@ -160,7 +160,8 @@ def main_summary():
 	kmer_list = [4, 8, 12, 16, 20]
 	numhash_list = [32, 64, 128, 256, 512]
 
-	trueJ_comb = np.empty((len(trueED), 26))
+	trueJ_comb = np.zeros((len(trueED), 26))
+	print(len(trueED))
 	trueJ_comb[:, 0] = trueED
 	err1 = [0] * 25
 	err2 = [0] * 25
