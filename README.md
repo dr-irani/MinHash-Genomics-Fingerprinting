@@ -1,4 +1,38 @@
 # CS447 Final Project:
+
+## Repository Organization
+    cs447-final-project/
+      |- README.md
+      |- minhash_combined.py --> source code for all MinHash implementations/modifications
+      |- edit_distance_DP.py --> Needleman-Wunsch implementation (source: [Dr. Benjamin Langmead][https://nbviewer.jupyter.org/github/BenLangmead/comp-genomics-class/tree/master/notebooks/])
+      |- generate_data.py -->
+      |- make_synth_data.py -->
+      |- process_fastq.py -->
+      |- profiler.py --> code for running time benchmarks for each MinHash implementation
+      |- run_DP.py -->
+      |- run_experiment.py --> 
+      |- tune_parameters.py -->
+      |- data/
+         |- README.md
+         |- ...
+      |- notebooks/
+         |- ...
+      |- output/
+         |- ...
+      |- profile_out/
+         |- ...
+      |- synth_data/
+         |- ...
+      |- synth_out/
+         |- ...
+      |- tuning/
+         |- ecoli/
+            |- ...
+         |- synth/
+            |- ...
+         |- ...
+
+
 ## MinHash Genomic Fingerprinting to Estimate Edit Distance
 
 ## Data Generation
@@ -12,7 +46,7 @@ All of our implementations for MinHash are contained in `minhash_combined.py` Th
 -n: "Length of fingerprint"
 -k: "Length of kmer"
 -s: "Length of stride"
--m: "Toggle multi hash layers"
+-m: "Toggle multi hash layers" (optional)
 ```
 
 Here is an example command to compare files `file1` and `file2` using 128 hash functions, k-mer size 16, and stride length of 1.
