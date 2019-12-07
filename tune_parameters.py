@@ -51,9 +51,9 @@ def tune(reads1, reads2, kmer_len, num_hash, output_file):
 	for i in range(len(reads1)):
 		seq1 = reads1[i]
 		seq2 = reads2[i]
-		print(seq2)
+		# print(seq2)
 
-		print(i)
+		# print(i)
 		output = get_jaccard(seq1, seq2, kmer_len, num_hash)		
 		f.write(output + '\n')
 
@@ -132,23 +132,23 @@ def summary(kmer_len, num_hash):
 	err2 = 0
 	err3 = 0
 	err4 = 0
+	print()
 	with open(hash_file) as f:
-		read = f.readline().split()
-		#len_x = int(read[0])
-		#len_y = int(read[1])
+		for line in iter(f.readline, r''):
+			print(line)
+			read = line.split()
+			TJ = float(read[2])
+			err1 += np.abs(TJ - float(read[3])) # Cumulative error for L-Hash
+			err2 += np.abs(TJ - float(read[4])) # Cumulative error for Bottom L
+			err3 += np.abs(TJ - float(read[5])) # Cumulative error for L-partition
+			err4 += np.abs(TJ - float(read[6])) # Cumulative error for Containment Hash
+			i += 1
+			trueJ.append(TJ)
 
-		TJ = float(read[2])
-		err1 += np.abs(TJ - float(read[3])) # Cumulative error for L-Hash
-		err2 += np.abs(TJ - float(read[4])) # Cumulative error for Bottom L
-		err3 += np.abs(TJ - float(read[5])) # Cumulative error for L-partition
-		err4 += np.abs(TJ - float(read[6])) # Cumulative error for Containment Hash
-		i += 1
-		trueJ.append(TJ)
-
-	err1 = err1/i
-	err2 = err2/i
-	err3 = err3/i
-	err4 = err4/i
+	err1 /= i
+	err2 /= i
+	err3 /= i
+	err4 /= i
 
 	return trueJ, err1, err2, err3, err4
 
@@ -162,12 +162,13 @@ def main_summary():
 
 	with open(trueED_file) as f:
 		trueED = [int(line) for line in iter(f.readline, r'')]
+		print(len(trueED))
 
 	kmer_list = [4, 8, 12, 16, 20]
 	numhash_list = [32, 64, 128, 256, 512]
 
 	trueJ_comb = np.zeros((len(trueED), 26))
-	print(len(trueED))
+	
 	trueJ_comb[:, 0] = trueED
 	err1 = [0] * 25
 	err2 = [0] * 25
@@ -204,5 +205,5 @@ def main():
 			print("Finished %d mer %d numhash" % (kmer_len, num_hash))
 
 if __name__ == '__main__':
-	main()
+	main_summary()
 	#main_summary()
