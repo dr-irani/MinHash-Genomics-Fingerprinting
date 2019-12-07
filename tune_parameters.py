@@ -39,15 +39,21 @@ def get_jaccard(seq1, seq2, kmer_len, num_hash):
 	jaccard4 = containment_min_hash(sets[1].set, bloom_filter=bloom_filter)
 
 	output = '{} \t {} \t {} \t {} \t {} \t {} \t {} \t'.format(len_x, len_y, truejaccard, jaccard1, jaccard2, jaccard3, jaccard4)
+	print(output)
+
 	return output
 
 
 def tune(reads1, reads2, kmer_len, num_hash, output_file):
 
 	f = open(output_file, 'w')
+	#import pdb; breakpoint()
 	for i in range(len(reads1)):
 		seq1 = reads1[i]
 		seq2 = reads2[i]
+		print(seq2)
+
+		print(i)
 		output = get_jaccard(seq1, seq2, kmer_len, num_hash)		
 		f.write(output + '\n')
 
@@ -95,6 +101,7 @@ def create_readlists():
 			reads2.append(seq2)
 
 	filenames1 = ['synth_data/synth_{}.txt'.format(i) for i in range(1,11)]		
+	
 	for i in range(1, 11):
 		
 		temp = 'synth_data/synth_{}_edited_*.txt'.format(i)
@@ -184,8 +191,8 @@ def main_summary():
 
 def main():
 
-	#reads1, reads2 = create_readlists()
-	reads1, reads2 = create_readlists_ecoli()
+	reads1, reads2 = create_readlists()
+	#reads1, reads2 = create_readlists_ecoli()
 
 	kmer_list = [4, 8, 12, 16, 20]
 	numhash_list = [32, 64, 128, 256, 512]
@@ -197,4 +204,5 @@ def main():
 			print("Finished %d mer %d numhash" % (kmer_len, num_hash))
 
 if __name__ == '__main__':
-	main_summary()
+	main()
+	#main_summary()
