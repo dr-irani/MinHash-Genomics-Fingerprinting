@@ -53,6 +53,7 @@ def get_args():
 	parser.add_argument("-k", help="Length of kmer", required=True, type=int)
 	parser.add_argument("-s", help="Length of stride", required=True, type=int)
 	parser.add_argument("-m", help="Use multi hash layers", required=False, default=False, type=bool)
+	parser.add_argument("-method", help="Specify which MinHash implementation to use. Options include \"khash\", \"bottomk\", \"kpartition\", \"containment\"")
 
 	args = parser.parse_args()
 	return args
@@ -209,7 +210,7 @@ def main():
 	num_hash = args.n
 	kmer_len = args.k 
 	stride_len = args.s
-	method = 'containment'
+	method = args.methods
 
 	with open(args.f1, 'r') as f:
 		seq = f.read()
