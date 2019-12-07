@@ -190,7 +190,7 @@ def estimate_edit_distance(jaccard, len_x, len_y, kmer_len):
 	min_len = min(len_x, len_y)
 	
 	alpha = min_len/max_len
-	edit_distance[0] = 1 - alpha
+	edit_distance[0] = (1 - alpha) * max_len
 	edit_distance[1] = (1 + alpha) * (jaccard/(2-jaccard)) * max_len
 	edit_distance[2] = (max_len - jaccard*min_len) / (kmer_len * (jaccard + 1))
 

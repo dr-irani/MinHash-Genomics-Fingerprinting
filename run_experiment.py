@@ -50,14 +50,12 @@ def ED_main():
 	kmer_len = 16
 	num_hash = 128
 
-	hash_files = ['output/synth_{}_hash.txt'.format(i) for i in range(1, 11)]
-	trueED_files = ['output/synth_{}_editdistance.txt'.format(i) for i in range(1, 11)]
+	hash_files = ['output/synth_{}_hash.txt'.format(i) for i in range(2, 11)]
+	trueED_files = ['output/synth_{}_editdistance.txt'.format(i) for i in range(2, 11)]
 	for i in range(1, 11):
 		for j in range(5):
 			hash_files.append('synth_output/synth_{}_{}_hash.txt'.format(i, j))
 			trueED_files.append('synth_output/synth_{}_{}_editdistance.txt'.format(i, j))
-
-	print(len(hash_files))
 
 	output_file = 'output/synthdata_estimated_editdistance.txt'
 	fo = open(output_file, 'w')
@@ -73,11 +71,17 @@ def ED_main():
 
 		with open(hf_name) as f: 
 			temp = f.readline()
-			[len_x, len_y, TJ, J1, J2, J3, J4] = temp.split()
+			templist = temp.split()
+			[len_x, len_y, TJ, J1, J2, J3, J4] = [float(i) for i in templist]
+			len_x = int(len_x)
+			len_y = int(len_y)
 
 		with open(ed_name) as f: 
 			temp = f.readline()
-			[len_x1, len_y1, trueED] = temp.split()
+			templist = temp.split()
+			[len_x1, len_y1, trueED] = [float(i) for i in templist]
+			len_x1 = int(len_x1)
+			len_y1 = int(len_y1)
 			assert len_x == len_x1
 			assert len_y == len_y1
 
@@ -102,7 +106,7 @@ def ecoli_main():
 	
 	# Input and output files
 	seq_file = 'data/ecoli_realdata.txt'
-	ED_file = 'output/.txt'
+	ED_file = 'output/ecoli_true_editdistance.txt'
 	hash_output_file = 'output/ecoli_hash.txt'
 	ed_output_file = 'output/ecoli_estimated_editdistance.txt'
 
@@ -111,16 +115,16 @@ def ecoli_main():
 	num_hash = 128
 
 	# Calculate Jaccard similarity for all pairs, output to hash_output_file
-	f = open(seq_file, 'r')
-	fo = open(hash_output_file, 'w')
+	# f = open(seq_file, 'r')
+	# fo = open(hash_output_file, 'w')
 
-	for i in range(0, 600, 2):
-		seq1 = f.readline()
-		seq2 = f.readline()
-		output = test(seq1, seq2, kmer_len, num_hash)
-		fo.write(output + '\n')
-	fo.close()
-	f.close()
+	# for i in range(0, 600, 2):
+	# 	seq1 = f.readline()
+	# 	seq2 = f.readline()
+	# 	output = test(seq1, seq2, kmer_len, num_hash)
+	# 	fo.write(output + '\n')
+	# fo.close()
+	# f.close()
 
 	# Calculate estimated edit distance for all pairs, output to ed_output_file
 	f_ed = open(ED_file, 'r')
@@ -133,12 +137,19 @@ def ecoli_main():
 	output = '\t'.join(output_header)
 	fo.write(output + '\n')
 
+	f_ed.readline()  # get rid of header
 	for i in range(0, 600, 2):
 		temp = f_h.readline()
-		[len_x, len_y, TJ, J1, J2, J3, J4] = temp.split()
+		templist = temp.split()
+		[len_x, len_y, TJ, J1, J2, J3, J4] = [float(i) for i in templist]
+		len_x = int(len_x)
+		len_y = int(len_y)
 
 		temp = f_ed.readline()
-		[len_x1, len_y1, trueED] = temp.split()
+		templist = temp.split('\t')
+		[len_x1, len_y1, trueED] = [float(i) for i in templist[1:]]
+		len_x1 = int(len_x1)
+		len_y1 = int(len_y1)
 		assert len_x == len_x1
 		assert len_y == len_y1
 
@@ -154,7 +165,8 @@ def ecoli_main():
 		fo.write(output + '\n')
 
 	fo.close()
-	f.close()
+	f_ed.close()
+	f_h.close()
 
 def synth_main():
 
@@ -227,9 +239,9 @@ def main():
 					test(i, j, f, reads[i], reads[j], kmer_len, num_hash)
 
 if __name__ == '__main__':
-	synth_main()
-	
-
+	#synth_main()
+	#ecoli_main()
+	ED_main()
 #cProfile.run('test()', 'OUTFILE')
 #p = pstats.Stats('OUTFILE')
 #p.sort_stats('tottime')
