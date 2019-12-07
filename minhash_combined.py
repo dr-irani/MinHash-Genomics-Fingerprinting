@@ -155,7 +155,7 @@ def containment_min_hash(seqset, bloom_filter=None):
 			bloom_filter.add(kmer)
 		return bloom_filter
 
-	union = -bloom_filter.size / bloom_filter.num_hash * np.log(1 -  np.count_nonzero(bloom_filter.union(seqset)) / bloom_filter.size)
+	union = -bloom_filter.size / bloom_filter.num_hash * np.log(1 - np.count_nonzero(bloom_filter.union(seqset)) / bloom_filter.size)
 	intersection = len(seqset) + bloom_filter.num_kmers - union
 	return intersection / union
 
