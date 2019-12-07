@@ -153,9 +153,8 @@ def main_summary():
 	trueED_file = 'output/synthdata_true_editdistance_single.txt'
 	#trueED_file = 'output/ecoli_true_editdistance_single.txt'
 
-	trueED = []
 	with open(trueED_file) as f:
-		trueED.append(int(f.readline()))
+		trueED = [int(line) for line in iter(f.readline, r'')]
 
 	kmer_list = [4, 8, 12, 16, 20]
 	numhash_list = [32, 64, 128, 256, 512]
