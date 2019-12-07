@@ -39,7 +39,7 @@ def get_jaccard(seq1, seq2, kmer_len, num_hash):
 	jaccard4 = containment_min_hash(sets[1].set, bloom_filter=bloom_filter)
 
 	output = '{} \t {} \t {} \t {} \t {} \t {} \t {} \t'.format(len_x, len_y, truejaccard, jaccard1, jaccard2, jaccard3, jaccard4)
-	print(output)
+	#print(output)
 
 	return output
 
@@ -51,9 +51,7 @@ def tune(reads1, reads2, kmer_len, num_hash, output_file):
 	for i in range(len(reads1)):
 		seq1 = reads1[i]
 		seq2 = reads2[i]
-		# print(seq2)
 
-		# print(i)
 		output = get_jaccard(seq1, seq2, kmer_len, num_hash)		
 		f.write(output + '\n')
 
@@ -83,7 +81,7 @@ def create_readlists():
 	'''
 	Create reads1, reads2 that contains the sequence pairs for simulated data
 	'''
-	filenames1 = ['data/synth_{}.txt'.format(i) for i in range(1,11)]
+	filenames1 = ['data/synth_{}.txt'.format(i) for i in range(2,11)]
 	filenames2 = ['data/synth_{}_edited.txt'.format(i) for i in range(1, 11)]
 
 	reads1 = []
@@ -132,10 +130,10 @@ def summary(kmer_len, num_hash):
 	err2 = 0
 	err3 = 0
 	err4 = 0
-	print()
+
 	with open(hash_file) as f:
+		#f.readline()
 		for line in iter(f.readline, r''):
-			print(line)
 			read = line.split()
 			TJ = float(read[2])
 			err1 += np.abs(TJ - float(read[3])) # Cumulative error for L-Hash
@@ -157,28 +155,28 @@ def main_summary():
 	Run summary() for each kmer, num_hash pair
 	'''
 
-	trueED_file = 'output/synthdata_true_editdistance_single.txt'
-	#trueED_file = 'output/ecoli_true_editdistance_single.txt'
+	#trueED_file = 'output/synthdata_true_editdistance_single.txt'
+	trueED_file = 'output/ecoli_true_editdistance_single.txt'
 
 	with open(trueED_file) as f:
 		trueED = [int(line) for line in iter(f.readline, r'')]
 		print(len(trueED))
 
-	kmer_list = [4, 8, 12, 16, 20]
+	kmer_list = [4, 8, 12, 16]
 	numhash_list = [32, 64, 128, 256, 512]
 
 	trueJ_comb = np.zeros((len(trueED), 26))
 	
 	trueJ_comb[:, 0] = trueED
-	err1 = [0] * 25
-	err2 = [0] * 25
-	err3 = [0] * 25
-	err4 = [0] * 25
+	err1 = [0] * 20
+	err2 = [0] * 20
+	err3 = [0] * 20
+	err4 = [0] * 20
 	i = 0
 	for kmer_len in kmer_list:
 		for num_hash in numhash_list:
 			trueJ, err1[i], err2[i], err3[i], err4[i] = summary(kmer_len, num_hash)
-			trueJ_comb[:, i+1] = np.asarray(trueJ).reshape((-1, 1))
+			trueJ_comb[:, i+1] = np.asarray(trueJ)
 			i += 1
 
 	err1 = np.asarray(err1).reshape((-1, 1))
@@ -187,13 +185,13 @@ def main_summary():
 	err4 = np.asarray(err4).reshape((-1, 1))
 	err = np.concatenate((err1, err2, err3, err4), axis = 1)
 
-	np.savetxt("synth_trueJ.csv", trueJ_comb, delimiter = ',')
-	np.savetxt("synth_hasherror.csv", err, delimiter = ',')
+	np.savetxt("ecoli_trueJ.csv", trueJ_comb, delimiter = ',')
+	np.savetxt("ecoli_hasherror.csv", err, delimiter = ',')
 
 def main():
 
-	reads1, reads2 = create_readlists()
-	#reads1, reads2 = create_readlists_ecoli()
+	#reads1, reads2 = create_readlists()
+	reads1, reads2 = create_readlists_ecoli()
 
 	kmer_list = [4, 8, 12, 16, 20]
 	numhash_list = [32, 64, 128, 256, 512]
@@ -205,5 +203,5 @@ def main():
 			print("Finished %d mer %d numhash" % (kmer_len, num_hash))
 
 if __name__ == '__main__':
+	#main()
 	main_summary()
-	#main_summary()
