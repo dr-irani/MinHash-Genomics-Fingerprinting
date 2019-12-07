@@ -121,8 +121,8 @@ def summary(kmer_len, num_hash):
 	'''
 	Summarize data and output for visualization.
 	'''
-	hash_file = 'tuning/synth/{}_mer_{}_numhash.txt'.format(kmer_len, num_hash)
-	#hash_file = 'tuning/ecoli/{}_mer_{}_numhash.txt'.format(kmer_len, num_hash)
+	#hash_file = 'tuning/synth/{}_mer_{}_numhash.txt'.format(kmer_len, num_hash)
+	hash_file = 'tuning/ecoli/{}_mer_{}_numhash.txt'.format(kmer_len, num_hash)
 
 	trueJ = []
 	i = 0
@@ -130,7 +130,8 @@ def summary(kmer_len, num_hash):
 	err2 = 0
 	err3 = 0
 	err4 = 0
-
+	print(kmer_len)
+	print(num_hash)
 	with open(hash_file) as f:
 		#f.readline()
 		for line in iter(f.readline, r''):
@@ -168,13 +169,15 @@ def main_summary():
 	trueJ_comb = np.zeros((len(trueED), 26))
 	
 	trueJ_comb[:, 0] = trueED
-	err1 = [0] * 20
-	err2 = [0] * 20
-	err3 = [0] * 20
-	err4 = [0] * 20
+	err1 = [0] * 19
+	err2 = [0] * 19
+	err3 = [0] * 19
+	err4 = [0] * 19
 	i = 0
 	for kmer_len in kmer_list:
 		for num_hash in numhash_list:
+			if kmer_len == 16 and num_hash == 512:
+				break
 			trueJ, err1[i], err2[i], err3[i], err4[i] = summary(kmer_len, num_hash)
 			trueJ_comb[:, i+1] = np.asarray(trueJ)
 			i += 1
