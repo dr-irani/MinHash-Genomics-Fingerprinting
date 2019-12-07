@@ -1,0 +1,1 @@
+pairID	ED	J_khash	ED_khash	J_bottomk	ED_bottomk	J_kpart	ED_kpart
