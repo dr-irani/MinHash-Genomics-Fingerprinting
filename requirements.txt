@@ -1,0 +1,7 @@
+numpy>=1.17.4
+scipy>=1.3.3
+
+
+# Hash library
+xxhash>=1.4.3
+
