@@ -179,8 +179,8 @@ def main_summary():
 	err4 = np.asarray(err4).reshape((-1, 1))
 	err = np.concatenate((err1, err2, err3, err4), axis = 1)
 
-	np.savetxt("synth_trueJ.txt", trueJ_comb, delimiter = '\t')
-	np.savetxt("synth_hasherror.txt", err, delimiter = '\t')
+	np.savetxt("synth_trueJ.csv", trueJ_comb, delimiter = ',')
+	np.savetxt("synth_hasherror.csv", err, delimiter = ',')
 
 def main():
 
