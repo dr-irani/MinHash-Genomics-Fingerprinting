@@ -1,0 +1,42 @@
+Fri Dec  6 21:39:17 2019    OUTFILE
+
+         10221380 function calls (10221370 primitive calls) in 2.080 seconds
+
+   Ordered by: internal time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+  2044160    0.765    0.000    1.278    0.000 /Users/darius/cs447-final-project/minhash_combined.py:84(apply_hash)
+        2    0.523    0.262    2.079    1.040 /Users/darius/cs447-final-project/minhash_combined.py:107(min_hash)
+  2044160    0.278    0.000    0.278    0.000 {built-in method builtins.min}
+  2044160    0.231    0.000    0.231    0.000 {method 'update' of 'xxhash.xxh32' objects}
+  2044160    0.166    0.000    0.166    0.000 {method 'intdigest' of 'xxhash.xxh32' objects}
+  2044160    0.116    0.000    0.116    0.000 {method 'reset' of 'xxhash.xxh32' objects}
+      129    0.000    0.000    0.000    0.000 /anaconda3/lib/python3.7/random.py:224(_randbelow)
+        2    0.000    0.000    0.000    0.000 /anaconda3/lib/python3.7/random.py:286(sample)
+        2    0.000    0.000    0.000    0.000 /Users/darius/cs447-final-project/minhash_combined.py:104(<listcomp>)
+        1    0.000    0.000    2.080    2.080 {built-in method builtins.exec}
+        1    0.000    0.000    0.000    0.000 /Users/darius/cs447-final-project/minhash_combined.py:172(calculate_jaccard)
+        1    0.000    0.000    0.000    0.000 {method 'union' of 'set' objects}
+      8/3    0.000    0.000    0.000    0.000 {built-in method _abc._abc_subclasscheck}
+        1    0.000    0.000    2.080    2.080 <string>:1(<module>)
+        1    0.000    0.000    2.079    2.079 profiler.py:25(test)
+        1    0.000    0.000    0.000    0.000 /Users/darius/cs447-final-project/minhash_combined.py:199(mash_distance)
+        1    0.000    0.000    0.000    0.000 {method 'intersection' of 'set' objects}
+      129    0.000    0.000    0.000    0.000 {method 'getrandbits' of '_random.Random' objects}
+        2    0.000    0.000    0.000    0.000 /Users/darius/cs447-final-project/minhash_combined.py:98(gen_k_hash_functions)
+        4    0.000    0.000    0.000    0.000 {built-in method _abc._abc_instancecheck}
+      129    0.000    0.000    0.000    0.000 {method 'bit_length' of 'int' objects}
+      129    0.000    0.000    0.000    0.000 {method 'add' of 'set' objects}
+        4    0.000    0.000    0.000    0.000 /anaconda3/lib/python3.7/abc.py:137(__instancecheck__)
+        4    0.000    0.000    0.000    0.000 {built-in method builtins.isinstance}
+        7    0.000    0.000    0.000    0.000 {built-in method builtins.len}
+        1    0.000    0.000    0.000    0.000 {built-in method builtins.sorted}
+      8/3    0.000    0.000    0.000    0.000 /anaconda3/lib/python3.7/abc.py:141(__subclasscheck__)
+        2    0.000    0.000    0.000    0.000 profiler.py:26(<lambda>)
+        1    0.000    0.000    0.000    0.000 {built-in method math.ceil}
+        6    0.000    0.000    0.000    0.000 /anaconda3/lib/python3.7/_collections_abc.py:392(__subclasshook__)
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+        1    0.000    0.000    0.000    0.000 {built-in method math.log}
+        2    0.000    0.000    0.000    0.000 /anaconda3/lib/python3.7/_collections_abc.py:302(__subclasshook__)
+
+

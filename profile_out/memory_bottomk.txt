@@ -1,0 +1,134 @@
+Filename: minhash_combined.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+   108     45.0 MiB     45.0 MiB   @profile
+   109                             def min_hash(seqset, num_hash, method, hash_fxns=None):
+   110                             	'''
+   111                             	Return MinHash fingerprint the input sequence and the hash function(s) used.
+   112                             	3 methods: khash, bottomk, kpartition
+   113                             	Each hash key is a kmer of length kmer_len.
+   114                             	'''
+   115     45.0 MiB      0.0 MiB   	fingerprint = [0]*num_hash
+   116     45.0 MiB      0.0 MiB   	hash_fxns = gen_k_hash_functions(1) if hash_fxns == None else hash_fxns
+   117                             
+   118     45.0 MiB      0.0 MiB   	if method == "khash":
+   119                             		# MinHash with k hash functions
+   120                             		
+   121                             		if len(hash_fxns) != num_hash:	
+   122                             			hash_fxns = gen_k_hash_functions(num_hash)
+   123                             		
+   124                             		for hash_index, h in enumerate(hash_fxns): 
+   125                             			min_hval = float('inf')
+   126                             			for kmer in seqset:
+   127                             				curr_hval = apply_hash(h, kmer)
+   128                             				min_hval = min(min_hval, curr_hval)
+   129                             			fingerprint[hash_index] = min_hval
+   130                             
+   131     45.0 MiB      0.0 MiB   	if method == "bottomk":
+   132                             		# MinHash with bottom k hashes
+   133     45.0 MiB      0.0 MiB   		h = hash_fxns[0]		
+   134     45.0 MiB      0.0 MiB   		hashes = []
+   135     45.2 MiB      0.0 MiB   		for kmer in seqset:
+   136     45.2 MiB      0.0 MiB   			hashes.append(apply_hash(h, kmer))
+   137     45.2 MiB      0.0 MiB   		hashes.sort()
+   138     45.2 MiB      0.0 MiB   		fingerprint = hashes[:num_hash]
+   139                             
+   140     45.2 MiB      0.0 MiB   	if method == "kpartition":
+   141                             		# MinHash with k partitions
+   142                             		# Literature suggested using the first few bits
+   143                             		num_bit = int(math.log2(num_hash))
+   144                             		h = hash_fxns[0]
+   145                             		for kmer in seqset:
+   146                             			hval = apply_hash(h, kmer)
+   147                             			binary = bin(hval)
+   148                             			i = int(binary[2:num_bit+2], 2)
+   149                             			fingerprint[i] = min(fingerprint[i], hval)
+   150     45.2 MiB      0.0 MiB   	return fingerprint, hash_fxns
+
+
+Filename: minhash_combined.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+   108     45.2 MiB     45.2 MiB   @profile
+   109                             def min_hash(seqset, num_hash, method, hash_fxns=None):
+   110                             	'''
+   111                             	Return MinHash fingerprint the input sequence and the hash function(s) used.
+   112                             	3 methods: khash, bottomk, kpartition
+   113                             	Each hash key is a kmer of length kmer_len.
+   114                             	'''
+   115     45.2 MiB      0.0 MiB   	fingerprint = [0]*num_hash
+   116     45.2 MiB      0.0 MiB   	hash_fxns = gen_k_hash_functions(1) if hash_fxns == None else hash_fxns
+   117                             
+   118     45.2 MiB      0.0 MiB   	if method == "khash":
+   119                             		# MinHash with k hash functions
+   120                             		
+   121                             		if len(hash_fxns) != num_hash:	
+   122                             			hash_fxns = gen_k_hash_functions(num_hash)
+   123                             		
+   124                             		for hash_index, h in enumerate(hash_fxns): 
+   125                             			min_hval = float('inf')
+   126                             			for kmer in seqset:
+   127                             				curr_hval = apply_hash(h, kmer)
+   128                             				min_hval = min(min_hval, curr_hval)
+   129                             			fingerprint[hash_index] = min_hval
+   130                             
+   131     45.2 MiB      0.0 MiB   	if method == "bottomk":
+   132                             		# MinHash with bottom k hashes
+   133     45.2 MiB      0.0 MiB   		h = hash_fxns[0]		
+   134     45.2 MiB      0.0 MiB   		hashes = []
+   135     45.3 MiB      0.0 MiB   		for kmer in seqset:
+   136     45.3 MiB      0.0 MiB   			hashes.append(apply_hash(h, kmer))
+   137     45.3 MiB      0.0 MiB   		hashes.sort()
+   138     45.3 MiB      0.0 MiB   		fingerprint = hashes[:num_hash]
+   139                             
+   140     45.3 MiB      0.0 MiB   	if method == "kpartition":
+   141                             		# MinHash with k partitions
+   142                             		# Literature suggested using the first few bits
+   143                             		num_bit = int(math.log2(num_hash))
+   144                             		h = hash_fxns[0]
+   145                             		for kmer in seqset:
+   146                             			hval = apply_hash(h, kmer)
+   147                             			binary = bin(hval)
+   148                             			i = int(binary[2:num_bit+2], 2)
+   149                             			fingerprint[i] = min(fingerprint[i], hval)
+   150     45.3 MiB      0.0 MiB   	return fingerprint, hash_fxns
+
+
+Filename: minhash_combined.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+   206     43.4 MiB     43.4 MiB   @profile
+   207                             def main():
+   208     43.4 MiB      0.0 MiB   	SeqSet = namedtuple('SeqSet', 'set len')
+   209     43.4 MiB      0.0 MiB   	args = get_args()
+   210     43.4 MiB      0.0 MiB   	num_hash = args.n
+   211     43.4 MiB      0.0 MiB   	kmer_len = args.k 
+   212     43.4 MiB      0.0 MiB   	stride_len = args.s
+   213     43.4 MiB      0.0 MiB   	method = 'bottomk'
+   214                             
+   215     43.4 MiB      0.0 MiB   	with open(args.f1, 'r') as f:
+   216     43.5 MiB      0.0 MiB   		seq = f.read()
+   217     44.0 MiB      0.5 MiB   		set1 = SeqSet(create_k_mer_set(seq, kmer_len, stride_len), len(seq))
+   218                             
+   219     44.0 MiB      0.0 MiB   	with open(args.f2, 'r') as f:
+   220     44.0 MiB      0.0 MiB   		seq = f.read()
+   221     45.0 MiB      1.0 MiB   		set2 = SeqSet(create_k_mer_set(seq, kmer_len, stride_len), len(seq))
+   222                             
+   223     45.0 MiB      0.0 MiB   	start_time = time.time()
+   224     45.0 MiB      0.0 MiB   	sets = sorted([set1, set2], key=lambda x: len(x.set), reverse=True)
+   225     45.0 MiB      0.0 MiB   	set1 = hash_kmers(sets[0].set) if args.m else sets[0].set
+   226     45.0 MiB      0.0 MiB   	set2 = hash_kmers(sets[1].set) if args.m else sets[1].set
+   227                             
+   228     45.0 MiB      0.0 MiB   	if method == 'containment':
+   229                             		bloom_filter = containment_min_hash(set1)
+   230                             		jaccard = containment_min_hash(set2, bloom_filter=bloom_filter)
+   231                             	else:
+   232     45.2 MiB      0.3 MiB   		fp1, hash_fxns = min_hash(set1, num_hash, method=method)
+   233     45.3 MiB      0.0 MiB   		fp2, hash_fxns = min_hash(set2, num_hash, method=method, hash_fxns=hash_fxns)
+   234     45.3 MiB      0.0 MiB   		jaccard = calculate_jaccard(num_hash, fp1, fp2)
+   235     45.3 MiB      0.0 MiB   	mash_dist = mash_distance(jaccard, kmer_len)
+
+

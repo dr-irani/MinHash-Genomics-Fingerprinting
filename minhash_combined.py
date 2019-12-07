@@ -5,7 +5,7 @@ import argparse
 import time
 import math
 from collections import namedtuple
-
+from memory_profiler import profile
 
 class BloomFilter(object):
 	def __init__(self, kmers, fp_prob=0.01):
@@ -104,6 +104,7 @@ def gen_k_hash_functions(k):
 	return [xxhash.xxh32(seed=seed) for seed in random_seeds]
 
 
+@profile
 def min_hash(seqset, num_hash, method, hash_fxns=None):
 	'''
 	Return MinHash fingerprint the input sequence and the hash function(s) used.
@@ -147,7 +148,7 @@ def min_hash(seqset, num_hash, method, hash_fxns=None):
 			fingerprint[i] = min(fingerprint[i], hval)
 	return fingerprint, hash_fxns
 
-
+@profile
 def containment_min_hash(seqset, bloom_filter=None):
 	if bloom_filter is None:
 		bloom_filter = BloomFilter(len(seqset))
@@ -201,13 +202,14 @@ def mash_distance(jaccard, kmer_len):
 	# correlation yes, but very different scale
 	return (-1/kmer_len) * np.log(2 * jaccard / (1 + jaccard))
 
+@profile
 def main():
 	SeqSet = namedtuple('SeqSet', 'set len')
 	args = get_args()
 	num_hash = args.n
 	kmer_len = args.k 
 	stride_len = args.s
-	method = 'khash'
+	method = 'containment'
 
 	with open(args.f1, 'r') as f:
 		seq = f.read()
@@ -231,11 +233,6 @@ def main():
 		jaccard = calculate_jaccard(num_hash, fp1, fp2)
 	mash_dist = mash_distance(jaccard, kmer_len)
 
-	#est_edit_dist = estimate_edit_distance(jaccard, sets[0].len, sets[1].len)
-
-	print(jaccard, mash_dist)
-	print("edit dist", est_edit_dist)
-	# print(elapsed_time)
 
 if __name__ == '__main__':
 	main()

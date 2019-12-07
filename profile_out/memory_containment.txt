@@ -1,0 +1,70 @@
+Filename: minhash_combined.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+   151     44.9 MiB     44.9 MiB   @profile
+   152                             def containment_min_hash(seqset, bloom_filter=None):
+   153     44.9 MiB      0.0 MiB   	if bloom_filter is None:
+   154     44.9 MiB      0.0 MiB   		bloom_filter = BloomFilter(len(seqset))
+   155     45.5 MiB      0.0 MiB   		for kmer in seqset:
+   156     45.5 MiB      0.0 MiB   			bloom_filter.add(kmer)
+   157     45.5 MiB      0.0 MiB   		return bloom_filter
+   158                             
+   159                             	union = -bloom_filter.size / bloom_filter.num_hash * np.log(1 - np.count_nonzero(bloom_filter.union(seqset)) / bloom_filter.size)
+   160                             	intersection = len(seqset) + bloom_filter.num_kmers - union
+   161                             	return intersection / union
+
+
+Filename: minhash_combined.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+   151     45.5 MiB     45.5 MiB   @profile
+   152                             def containment_min_hash(seqset, bloom_filter=None):
+   153     45.5 MiB      0.0 MiB   	if bloom_filter is None:
+   154                             		bloom_filter = BloomFilter(len(seqset))
+   155                             		for kmer in seqset:
+   156                             			bloom_filter.add(kmer)
+   157                             		return bloom_filter
+   158                             
+   159     47.0 MiB      1.5 MiB   	union = -bloom_filter.size / bloom_filter.num_hash * np.log(1 - np.count_nonzero(bloom_filter.union(seqset)) / bloom_filter.size)
+   160     47.0 MiB      0.0 MiB   	intersection = len(seqset) + bloom_filter.num_kmers - union
+   161     47.0 MiB      0.0 MiB   	return intersection / union
+
+
+Filename: minhash_combined.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+   205     43.3 MiB     43.3 MiB   @profile
+   206                             def main():
+   207     43.3 MiB      0.0 MiB   	SeqSet = namedtuple('SeqSet', 'set len')
+   208     43.3 MiB      0.0 MiB   	args = get_args()
+   209     43.3 MiB      0.0 MiB   	num_hash = args.n
+   210     43.3 MiB      0.0 MiB   	kmer_len = args.k 
+   211     43.3 MiB      0.0 MiB   	stride_len = args.s
+   212     43.3 MiB      0.0 MiB   	method = 'containment'
+   213                             
+   214     43.3 MiB      0.0 MiB   	with open(args.f1, 'r') as f:
+   215     43.3 MiB      0.0 MiB   		seq = f.read()
+   216     43.8 MiB      0.5 MiB   		set1 = SeqSet(create_k_mer_set(seq, kmer_len, stride_len), len(seq))
+   217                             
+   218     43.8 MiB      0.0 MiB   	with open(args.f2, 'r') as f:
+   219     43.8 MiB      0.0 MiB   		seq = f.read()
+   220     44.9 MiB      1.0 MiB   		set2 = SeqSet(create_k_mer_set(seq, kmer_len, stride_len), len(seq))
+   221                             
+   222     44.9 MiB      0.0 MiB   	start_time = time.time()
+   223     44.9 MiB      0.0 MiB   	sets = sorted([set1, set2], key=lambda x: len(x.set), reverse=True)
+   224     44.9 MiB      0.0 MiB   	set1 = hash_kmers(sets[0].set) if args.m else sets[0].set
+   225     44.9 MiB      0.0 MiB   	set2 = hash_kmers(sets[1].set) if args.m else sets[1].set
+   226                             
+   227     44.9 MiB      0.0 MiB   	if method == 'containment':
+   228     45.5 MiB      0.6 MiB   		bloom_filter = containment_min_hash(set1)
+   229     47.0 MiB      1.5 MiB   		jaccard = containment_min_hash(set2, bloom_filter=bloom_filter)
+   230                             	else:
+   231                             		fp1, hash_fxns = min_hash(set1, num_hash, method=method)
+   232                             		fp2, hash_fxns = min_hash(set2, num_hash, method=method, hash_fxns=hash_fxns)
+   233                             		jaccard = calculate_jaccard(num_hash, fp1, fp2)
+   234     47.0 MiB      0.0 MiB   	mash_dist = mash_distance(jaccard, kmer_len)
+
+
