@@ -121,16 +121,20 @@ def summary(kmer_len, num_hash):
 
 	trueJ = []
 	i = 0
+	err1 = 0
+	err2 = 0
+	err3 = 0
+	err4 = 0
 	with open(hash_file) as f:
 		read = f.readline().split()
 		#len_x = int(read[0])
 		#len_y = int(read[1])
 
 		TJ = float(read[2])
-		err1 += math.abs(TJ - float(read[3])) # Cumulative error for L-Hash
-		err2 += math.abs(TJ - float(read[4])) # Cumulative error for Bottom L
-		err3 += math.abs(TJ - float(read[5])) # Cumulative error for L-partition
-		err4 += math.abs(TJ - float(read[6])) # Cumulative error for Containment Hash
+		err1 += np.abs(TJ - float(read[3])) # Cumulative error for L-Hash
+		err2 += np.abs(TJ - float(read[4])) # Cumulative error for Bottom L
+		err3 += np.abs(TJ - float(read[5])) # Cumulative error for L-partition
+		err4 += np.abs(TJ - float(read[6])) # Cumulative error for Containment Hash
 		i += 1
 		trueJ.append(TJ)
 
@@ -193,4 +197,4 @@ def main():
 			print("Finished %d mer %d numhash" % (kmer_len, num_hash))
 
 if __name__ == '__main__':
-	main()
+	main_summary()
