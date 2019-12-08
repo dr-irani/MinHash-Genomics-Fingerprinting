@@ -68,10 +68,20 @@ Stretch goals:
 '''
 
 def create_k_mer_set(seq, kmer_len, stride_len):
-	'''
-	Return set of unique k-mers inside sequence.
-	Stride length between kmers given by stride_len.
-	'''
+	"""
+	Create set of k-mers from the sequence.
+
+	Parameters
+	----------
+	seq : string sequence to perform bottom-k sketch on
+	kmer_len : int the length of the k-mers of the sequence
+	stride_len : int the stride length in extracting k-mers from the sequence
+
+	Returns
+	-------
+	kmer_set : set of strings
+		The set of k-mers from the sequence
+	"""
 	kmer_set = set()
 	i = 0
 	while i + kmer_len < len(seq): 
@@ -82,13 +92,23 @@ def create_k_mer_set(seq, kmer_len, stride_len):
 	return kmer_set
 
 def apply_hash(h, key):
-	''' 
-	Return h(key). 
+	"""
+	Apply a hash function to the key.
 	This function is a wrapper for xxhash functions with initialized seeds.
 	Currently assume h is a xxhash.x32 object with initialized seed
 	If we change choice of hash function later, it will be easier to change
 	how we apply the hash (either through a function or an object) in this method
-	'''
+
+	Parameters
+	----------
+	h : hash function to apply
+	key : key to hash
+
+	Returns
+	-------
+	val : int
+		The hash value of the hashed key.
+	"""
 	h.update(key)
 	val = h.intdigest() # TODO: What representation to return? (hex in str format?)
 	h.reset()
@@ -96,10 +116,19 @@ def apply_hash(h, key):
 
 
 def gen_k_hash_functions(k):
-	'''
+	"""
 	Return k random 32-bit seeds for xxh32 (maybe experiment with 64 bit)
 	Currently returns xxhash.x32 objects with initialized seeds.
-	'''
+	
+	Parameters
+	----------
+	k : number of random seeds for xxh32
+
+	Returns
+	-------
+	val : list of ints
+		List of random 32-bit seeds for xxh32.
+	"""
 	random_seeds = random.sample(range(0xfffffff),k) 
 	return [xxhash.xxh32(seed=seed) for seed in random_seeds]
 
@@ -111,6 +140,7 @@ def min_hash(seqset, num_hash, method, hash_fxns=None):
 	3 methods: khash, bottomk, kpartition
 	Each hash key is a kmer of length kmer_len.
 	'''
+
 	fingerprint = [0]*num_hash
 	hash_fxns = gen_k_hash_functions(1) if hash_fxns == None else hash_fxns
 
