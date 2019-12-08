@@ -4,7 +4,7 @@
     cs447-final-project/
       |- README.md
       |- minhash_combined.py --> source code for all MinHash implementations/modifications
-      |- edit_distance_DP.py --> Needleman-Wunsch implementation (source: [Dr. Benjamin Langmead][https://nbviewer.jupyter.org/github/BenLangmead/comp-genomics-class/tree/master/notebooks/])
+      |- edit_distance_DP.py --> Needleman-Wunsch implementation (source: [Dr. Benjamin Langmead](https://nbviewer.jupyter.org/github/BenLangmead/comp-genomics-class/tree/master/notebooks/))
       |- generate_data.py -->
       |- make_synth_data.py -->
       |- process_fastq.py -->
