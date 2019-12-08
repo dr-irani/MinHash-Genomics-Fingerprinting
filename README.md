@@ -11,7 +11,7 @@
       |- profiler.py --> code for running time benchmarks for each MinHash implementation
       |- run_DP.py --> Runs edit_distance_DP.py for the all sequence pairs
       |- run_experiment.py --> Calculates estimated edit distance using the computed Jaccard similarities
-      |- tune_parameters.py -->
+      |- tune_parameters.py --> Iterates through combinations of k and L pairs to compute Jaccard similarity
       |- data/
          |- README.md
          |- ...
