@@ -71,3 +71,8 @@ The `run_experiment.py` is used to compute the estimated edit distance using the
 - True Jaccard and estimated Jaccard from the 4 algorithms: TJ, J1, J2, J3, J4
 - True edit distance computed from Needleman-Wunsch: trueED
 - 3 Estimated edit distances for each of the Jaccard simlarity values (lower, upper bound from IEEE paper, our point estimate): TED (from TJ), ED1, ED2, ED3, ED4 (from J1, J2, J3, J4 respectively).
+
+## Benchmarking
+The `profiler.py` is used to benchmark time on the four MinHash implementations. This profiling is done using a common set of parameters: 16 k-mer length, 128 hash functions, stride length 1. They are provided two 8001-bp sequences with an true edit distance of 98. Output of the script should be piped into a new file, which gives time and function call stats sorted by total time to run.
+
+Inside `minhash_combined.py` there are commented out `@profile` blocks. If you uncomment `from memory_profiler import profile` and these `@profile` sections, then you'll output the memory requirements for certain functions in the file.
