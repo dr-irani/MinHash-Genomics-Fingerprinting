@@ -12,7 +12,7 @@ def edDistDp(x, y):
 
 	Returns
 	-------
-	d : edit distance
+	d : int edit distance
 
 	"""
 	D = zeros((len(x)+1, len(y)+1), dtype=int)

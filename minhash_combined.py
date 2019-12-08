@@ -44,7 +44,6 @@ class BloomFilter(object):
 		return np.bitwise_or(self.filter.astype(np.int32), union_filter.astype(np.int32))
 
 
-
 def get_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-f1", help="Path of sequence1 .txt file", required=True)
@@ -199,7 +198,7 @@ def estimate_edit_distance(jaccard, len_x, len_y, kmer_len):
 	return edit_distance
 
 def mash_distance(jaccard, kmer_len):
-	# this seems to be pretty different from the actual edit distance though..
+	# this seems to be pretty different from the actual edit distance
 	# correlation yes, but very different scale
 	return (-1/kmer_len) * np.log(2 * jaccard / (1 + jaccard))
 
