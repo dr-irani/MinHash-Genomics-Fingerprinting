@@ -4,9 +4,9 @@
     cs447-final-project/
       |- README.md
       |- minhash_combined.py --> source code for all MinHash implementations/modifications
-      |- edit_distance_DP.py --> Needleman-Wunsch implementation (source: [Dr. Benjamin Langmead](https://nbviewer.jupyter.org/github/BenLangmead/comp-genomics-class/tree/master/notebooks/))
-      |- generate_data.py -->
-      |- make_synth_data.py -->
+      |- edit_distance_DP.py --> Needleman-Wunsch implementation (Provided in lecture)
+      |- generate_data.py --> For generating synthetic reads and inserting edits to given sequence
+      |- make_synth_data.py --> Script that calls generate_data.py and generates random samples used in our analysis
       |- process_fastq.py --> For extracting only the sequences from the PACBIO .fastq file
       |- profiler.py --> code for running time benchmarks for each MinHash implementation
       |- run_DP.py --> Runs edit_distance_DP.py for the all sequence pairs
@@ -31,7 +31,8 @@
          |- synth/
             |- ...
          |- ...
-
+Source for Needleman-Wunsch Implementation:
+[Jupyter Notebook Link](https://nbviewer.jupyter.org/github/BenLangmead/comp-genomics-class/tree/master/notebooks/)
 
 ## MinHash Genomic Fingerprinting to Estimate Edit Distance
 
