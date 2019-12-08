@@ -5,7 +5,7 @@ import argparse
 import time
 import math
 from collections import namedtuple
-from memory_profiler import profile
+# from memory_profiler import profile
 
 class BloomFilter(object):
 	def __init__(self, kmers, fp_prob=0.01):
@@ -133,7 +133,7 @@ def gen_k_hash_functions(k):
 	return [xxhash.xxh32(seed=seed) for seed in random_seeds]
 
 
-@profile
+# @profile
 def min_hash(seqset, num_hash, method, hash_fxns=None):
 	'''
 	Return MinHash fingerprint the input sequence and the hash function(s) used.
@@ -178,7 +178,7 @@ def min_hash(seqset, num_hash, method, hash_fxns=None):
 			fingerprint[i] = min(fingerprint[i], hval)
 	return fingerprint, hash_fxns
 
-@profile
+# @profile
 def containment_min_hash(seqset, bloom_filter=None):
 	if bloom_filter is None:
 		bloom_filter = BloomFilter(len(seqset))
@@ -232,7 +232,7 @@ def mash_distance(jaccard, kmer_len):
 	# correlation yes, but very different scale
 	return (-1/kmer_len) * np.log(2 * jaccard / (1 + jaccard))
 
-@profile
+# @profile
 def main():
 	SeqSet = namedtuple('SeqSet', 'set len')
 	args = get_args()
@@ -262,6 +262,7 @@ def main():
 		fp2, hash_fxns = min_hash(set2, num_hash, method=method, hash_fxns=hash_fxns)
 		jaccard = calculate_jaccard(num_hash, fp1, fp2)
 	mash_dist = mash_distance(jaccard, kmer_len)
+	print(mash_dist)
 
 
 if __name__ == '__main__':
