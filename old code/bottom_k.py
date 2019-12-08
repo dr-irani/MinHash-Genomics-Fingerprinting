@@ -2,9 +2,21 @@ import math
 import numpy as np
 
 def k_partition(seq, k, kmer_len, stride_len):
-	'''
-	Return k-partition minhash sketch fingerprint of seq.
-	'''
+	"""
+    Return k-partition minhash sketch fingerprint of sequence.
+
+    Parameters
+    ----------
+    seq : string sequence to perform bottom-k sketch on
+    k : number of hash value representatives in k-partition sketch
+	kmer_len : int the length of the k-mers of the sequence
+	stride_len : int the stride length in extracting k-mers from the sequence
+
+    Returns
+    -------
+    fingerprint : list of ints
+        The k-partition fingerprint sketch of the sequence.
+    """
 	n = len(seq)
 	p_size = math.floor(n/k)
 	hashes = []
@@ -20,12 +32,22 @@ def k_partition(seq, k, kmer_len, stride_len):
 
 	return hashes
 
-def bottom_k(seq, k, kmer_len, stride_len):
-	'''
-	Return bottom-k minhash sketch fingerprint of seq.
-	k-mers of kmer_len extracted from seq by taking stride
-	lengths of stride_len.
-	'''
+def bottom_k(seq, k, kmer_len, stride_len=1):
+	"""
+    Return bottom-k minhash sketch fingerprint of sequence.
+
+    Parameters
+    ----------
+    seq : string sequence to perform bottom-k sketch on
+    k : number of hash value representatives in bottom-k sketch
+	kmer_len : int the length of the k-mers of the sequence
+	stride_len : int the stride length in extracting k-mers from the sequence
+
+    Returns
+    -------
+    fingerprint : list of ints
+        The bottom-k fingerprint sketch of the sequence.
+    """
 	i = 0
 	hashes = []
 	n = len(seq)
@@ -38,26 +60,22 @@ def bottom_k(seq, k, kmer_len, stride_len):
 
 	return hashes[:k]
 
-
-def weighted_edit_distance(x, y, m, g):
-
-	'''
-	Calculate weighted edit distance between sequences x and y
-	using matrix dynamic programming. Return weighted edit
-	distance. For edit distance: m = 1, g = 1.
-	'''
-	D = np.zeros((len(x)+1, len(y)+1), dtype=int)
-	D[0, 1:] = range(1, len(y)+1)
-	D[1:, 0] = range(1, len(x)+1)
-
-	for i in range(1, len(x)+1):
-		for j in range(1, len(y)+1):
-			delt = m if x[i-1] != y[j-1] else 0
-			D[i, j] = min(D[i-1, j-1]+delt, D[i-1, j]+g, D[i, j-1]+g)
-
-	return D[len(x), len(y)]
-
 def estimate_edit_distance(jaccard, len_x, len_y):
+	"""
+    Return the estimated edit distance between two seequences.
+
+    Parameters
+    ----------
+    jaccard : double/float Jaccard similarity metric between the two sequences
+    len_x : int length of sequence x
+    len_y : int length of sequence y
+
+    Returns
+    -------
+    edit_distance : list of int/float/double
+        The estimated edit distance estimate or lower bound and upper bound on
+        edit distance.
+    """
 	if len_x == len_y:
 		return [jaccard * len_x]
 	else:
@@ -65,4 +83,17 @@ def estimate_edit_distance(jaccard, len_x, len_y):
 		return [1 - alpha, (1+alpha) * (jaccard/(2-jaccard))]
 
 def mash_distance(jaccard, kmer_len):
+	"""
+    Calculates the mash distance between two sets of k-mers.
+
+    Parameters
+    ----------
+    jaccard : double/float Jaccard similarity metric between the two sequences
+	kmer_len : int the length of the k-mers of the sequence
+
+    Returns
+    -------
+    mash distance : double/float
+        The mash distance between two sets of k-mers.
+    """
 	return (-1/kmer_len) * np.log(2 * jaccard / (1 + jaccard))

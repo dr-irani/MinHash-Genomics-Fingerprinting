@@ -3,6 +3,7 @@ import gc
 from edit_distance_DP import edDistDp
 import re
 import glob
+
 def calculate_metrics(seq1, seq2):
 
 	edit_distance = edDistDp(seq1, seq2)
@@ -30,8 +31,6 @@ def simulated_data():
 				fo.write(output)
 				print("%d completed" % i)
 				fo.close
-
-		
 
 	# with open(filename) as f:
 	# 	seq = f.readline()
@@ -73,6 +72,7 @@ def real_ecoli_data():
 		print("%d, %d completed" % (i, i+1))
 	fo.close()
 
+# Main.
 if __name__ == '__main__':
 	
 	simulated_data()
